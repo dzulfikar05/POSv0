@@ -1,7 +1,7 @@
 @extends('layouts.template')
 
 @section('content')
-    <div class="card card-outline card-primary">
+    <div class="card card-outline card-primary content-card">
         <div class="card-header">
             <h3 class="card-title">{{ $page->title }}</h3>
             <div class="card-tools">
@@ -9,21 +9,23 @@
                     <div class="dropdown mr-2">
                         <button class="btn btn-outline-primary dropdown-toggle" type="button" id="importExportDropdown"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Import / Export
+                            Export
                         </button>
                         <div class="dropdown-menu" aria-labelledby="importExportDropdown">
-                            <button class="dropdown-item" onclick="modalAction('{{ url('/stok/import') }}')">
-                                Import Stok
-                            </button>
-                            <a class="dropdown-item" id="exportExcelUrl" href="{{ url('/stok/export_excel') }}">
-                                <i class="fa fa-file-excel"></i> Export to Excel
+                            {{-- <button class="dropdown-item d-flex align-items-center"
+                                onclick="modalAction('{{ url('/stok/import') }}')">
+                                <i class="fa fa-upload mr-2 text-primary"></i> Import Data
+                            </button> --}}
+                            <a class="dropdown-item d-flex align-items-center" id="exportExcelUrl" href="{{ url('/stok/export_excel') }}">
+                                <i class="fa fa-file-excel mr-2 text-success"></i> Export to Excel
                             </a>
-                            <a class="dropdown-item" id="exportPdfUrl" href="{{ url('/stok/export_pdf') }}" target="_blank">
-                                <i class="fa fa-file-pdf"></i> Export to PDF
+                            <a class="dropdown-item d-flex align-items-center" id="exportPdfUrl" href="{{ url('/stok/export_pdf') }}"
+                                target="_blank">
+                                <i class="fa fa-file-pdf mr-2 text-danger"></i> Export to PDF
                             </a>
                         </div>
-                    </div>
 
+                    </div>
                     <button onclick="modalAction('{{ url('/stok/create_ajax') }}')" class="btn btn-primary mr-2">Tambah
                         Data</button>
                 </div>
@@ -32,7 +34,7 @@
         <div class="card-body">
             <div class="row mb-3">
                 <div class="col-md-2">
-                    <select id="filter_tahun" class="form-control">
+                    <select id="filter_tahun" class="form-control filter_tahun">
                         <option value="">Semua Tahun</option>
                         @for ($year = date('Y'); $year >= 2020; $year--)
                             <option value="{{ $year }}" {{ $year == date('Y') ? 'selected' : '' }}>
@@ -41,7 +43,7 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <select id="filter_bulan" class="form-control">
+                    <select id="filter_bulan" class="form-control filter_bulan">
                         <option value="">Semua Bulan</option>
                         @php
                             $bulanIndonesia = [
@@ -71,7 +73,7 @@
             </div>
             <div class="mb-3">
                 <div id="total_harga"
-                    class="d-flex justify-content-start align-items-center p-3 col-2
+                    class="d-flex justify-content-start align-items-center p-3 col-md-3
                     bg-white border border-primary rounded shadow-sm text-primary font-weight-bold
                     h5"
                     style="transition: all 0.3s ease;">
@@ -130,6 +132,15 @@
 
 @push('js')
     <script>
+        $(() => {
+            $('.filter_tahun').select2({
+                dropdownParent: $('.content-card')
+            });
+            $('.filter_bulan').select2({
+                dropdownParent: $('.content-card')
+            });
+        })
+
         $(() => {
             updateExportLinks();
             fetchRekapBulanan($('#filter_tahun').val());

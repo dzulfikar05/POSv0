@@ -18,12 +18,12 @@ class StokController extends Controller
     public function index()
     {
         $breadcrumb = (object)[
-            'title' => 'Daftar Stok Pengeluaran Pembelanjaan',
+            'title' => 'Data Stok Pengeluaran Pembelanjaan',
             'list' => ['Home', 'Stok Pembelanjaan']
         ];
 
         $page = (object)[
-            'title' => 'Daftar stok produk yang terdaftar dalam sistem'
+            'title' => ''
         ];
 
         $activeMenu = 'stok';
@@ -306,10 +306,9 @@ class StokController extends Controller
                 $query->whereMonth('stok_tanggal', $bulan);
             })->get();
 
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        // Mapping nama bulan
         $bulanIndonesia = [
             '01' => 'Januari',
             '02' => 'Februari',
@@ -328,34 +327,38 @@ class StokController extends Controller
         $tahun = $request->tahun ?? 'Semua';
         $bulan = $request->bulan ? ($bulanIndonesia[$request->bulan] ?? $request->bulan) : 'Semua';
 
-        // Tambahan keterangan
+        // Keterangan filter
         $sheet->setCellValue('A1', "Data Stok Tahun: $tahun");
         $sheet->setCellValue('A2', "Bulan: $bulan");
 
-        // Header
+        // Header kolom (mulai baris 4)
         $sheet->setCellValue('A4', 'No');
-        $sheet->setCellValue('B4', 'Item');
-        $sheet->setCellValue('C4', 'User');
-        $sheet->setCellValue('D4', 'Tanggal');
-        $sheet->setCellValue('E4', 'Jumlah');
-        $sheet->setCellValue('F4', 'Supplier');
+        $sheet->setCellValue('B4', 'Tanggal');
+        $sheet->setCellValue('C4', 'Nama Item');
+        $sheet->setCellValue('D4', 'Jumlah');
+        $sheet->setCellValue('E4', 'Supplier');
+        $sheet->setCellValue('F4', 'Keterangan');
+        $sheet->setCellValue('G4', 'User');
 
-        // Data dimulai dari baris ke-5
+        // Isi data
         $row = 5;
         foreach ($stok as $index => $s) {
             $sheet->setCellValue('A' . $row, $index + 1);
-            $sheet->setCellValue('B' . $row, $s->item ?? '');
-            $sheet->setCellValue('C' . $row, $s->user->name ?? '');
-            $sheet->setCellValue('D' . $row, $s->stok_tanggal);
-            $sheet->setCellValue('E' . $row, $s->stok_jumlah);
-            $sheet->setCellValue('F' . $row, $s->supplier->supplier_nama ?? '');
+            $sheet->setCellValue('B' . $row, \Carbon\Carbon::parse($s->stok_tanggal)->format('d/m/Y'));
+            $sheet->setCellValue('C' . $row, $s->item ?? '-');
+            $sheet->setCellValue('D' . $row, $s->stok_jumlah);
+            $sheet->setCellValue('E' . $row, $s->supplier->supplier_nama ?? '-');
+            $sheet->setCellValue('F' . $row, $s->keterangan ?? '');
+            $sheet->setCellValue('G' . $row, $s->user->nama ?? '-');
             $row++;
         }
 
-        foreach (range('A', 'F') as $column) {
+        // Auto size kolom
+        foreach (range('A', 'G') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
+        // Export
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
         $filename = 'Data_Stok_' . now()->format('Y-m-d_His') . '.xlsx';
 
@@ -366,6 +369,7 @@ class StokController extends Controller
         $writer->save('php://output');
         exit;
     }
+
 
     public function export_pdf(Request $request)
     {

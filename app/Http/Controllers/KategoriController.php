@@ -15,12 +15,12 @@ class KategoriController extends Controller
     public function index()
     {
         $breadcrumb = (object) [
-            'title' => 'Daftar Kategori',
+            'title' => 'Data Kategori',
             'list' => ['Home', 'Kategori']
         ];
 
         $page = (object) [
-            'title' => 'Daftar kategori yang terdaftar dalam sistem'
+            'title' => ''
         ];
 
         $activeMenu = 'kategori';
@@ -89,7 +89,7 @@ class KategoriController extends Controller
 
         if ($request->ajax() || $request->wantsJson()) {
             $rules = [
-                'kategori_kode' => 'required|string|min:3|unique:m_kategori,kategori_kode',
+                'kategori_kode' => 'required|string|min:3|unique:m_kategori,kategori_kode,' . $id . ',kategori_id',
                 'kategori_nama' => 'required|string|max:100',
             ];
 
@@ -168,44 +168,56 @@ class KategoriController extends Controller
                     'msgField' => $validator->errors()
                 ]);
             }
-            $file = $request->file('file_kategori');
 
+            $file = $request->file('file_kategori');
             $reader = IOFactory::createReader('Xlsx');
             $reader->setReadDataOnly(true);
             $spreadsheet = $reader->load($file->getRealPath());
             $sheet = $spreadsheet->getActiveSheet();
-
             $data = $sheet->toArray(null, false, true, true);
 
             $insert = [];
+            $duplikat = [];
+
             if (count($data) > 1) {
                 foreach ($data as $baris => $value) {
                     if ($baris > 1) {
+                        $kode = trim($value['A']);
+
+                        if (KategoriModel::where('kategori_kode', $kode)->exists()) {
+                            $duplikat[] = "Baris $baris - Kode '$kode' sudah ada";
+                            continue;
+                        }
+
                         $insert[] = [
-                            'kategori_kode' => $value['A'],
-                            'kategori_nama' => $value['B'],
+                            'kategori_kode' => $kode,
+                            'kategori_nama' => trim($value['B']),
                             'created_at' => now(),
                         ];
                     }
                 }
 
                 if (count($insert) > 0) {
-                    KategoriModel::insertOrIgnore($insert);
+                    KategoriModel::insert($insert);
                 }
 
                 return response()->json([
-                    'status' => true,
-                    'message' => 'Data berhasil diimport'
-                ]);
-            } else {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Tidak ada data yang diimport'
+                    'status' => empty($duplikat),
+                    'message' => empty($duplikat)
+                        ? 'Data berhasil diimport.'
+                        : 'Import sebagian berhasil:<br>' . implode('<br>', $duplikat)
                 ]);
             }
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Tidak ada data yang diimport'
+            ]);
         }
+
         return redirect('/');
     }
+
 
     public function export_excel()
     {
@@ -258,8 +270,8 @@ class KategoriController extends Controller
     public function export_pdf()
     {
         $kategori = KategoriModel::select('kategori_kode', 'kategori_nama')
-        ->orderBy('kategori_id')
-        ->get();
+            ->orderBy('kategori_id')
+            ->get();
 
         $pdf = Pdf::loadView('kategori.export_pdf', ['kategori' => $kategori]);
         $pdf->setPaper('a4', 'portrait');

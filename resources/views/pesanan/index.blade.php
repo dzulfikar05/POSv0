@@ -1,7 +1,7 @@
 @extends('layouts.template')
 
 @section('content')
-    <div class="card card-outline card-primary">
+    <div class="card card-outline card-primary content-card">
         <div class="card-header">
             <h3 class="card-title">{{ $page->title }}</h3>
             <div class="card-tools">
@@ -30,7 +30,7 @@
         <div class="card-body">
             <div class="row mb-3">
                 <div class="col-md-2">
-                    <select id="filter_tahun" class="form-control">
+                    <select id="filter_tahun" class="form-control filter_tahun">
                         <option value="">Semua Tahun</option>
                         @for ($year = date('Y'); $year >= 2020; $year--)
                             <option value="{{ $year }}" {{ $year == date('Y') ? 'selected' : '' }}>
@@ -39,7 +39,7 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <select id="filter_bulan" class="form-control">
+                    <select id="filter_bulan" class="form-control filter_bulan">
                         <option value="">Semua Bulan</option>
                         @php
                             $bulanIndonesia = [
@@ -103,7 +103,14 @@
 
 @push('js')
     <script>
-
+        $(() => {
+            $('.filter_tahun').select2({
+                dropdownParent: $('.content-card')
+            });
+            $('.filter_bulan').select2({
+                dropdownParent: $('.content-card')
+            });
+        })
         $('#filter_tahun, #filter_bulan').on('change', function() {
             tablePesanan.ajax.reload();
         });

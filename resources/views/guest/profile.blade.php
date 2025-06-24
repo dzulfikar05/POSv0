@@ -170,7 +170,7 @@
                 },
                 wa: {
                     required: true,
-                    pattern: /^(08|628)[0-9]{7,12}$/
+                    pattern: /^(628)[0-9]{7,12}$/
                 },
                 password: {
                     minlength: 6,

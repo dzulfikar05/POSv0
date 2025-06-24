@@ -18,12 +18,12 @@ class CustomerController extends Controller
     public function index()
     {
         $breadcrumb = (object) [
-            'title' => 'Daftar Customer',
+            'title' => 'Data Customer',
             'list' => ['Home', 'Customer']
         ];
 
         $page = (object) [
-            'title' => 'Daftar customer yang terdaftar dalam sistem'
+            'title' => ''
         ];
 
         $activeMenu = 'customer';
@@ -172,12 +172,12 @@ class CustomerController extends Controller
                 $file = $request->file('photo');
                 $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                 $file->storeAs('public/uploads/photo', $filename);
-                if(isset($params['photo'])) unset($params['photo']);
+                if (isset($params['photo'])) unset($params['photo']);
                 $params['photo'] = $filename;
             }
 
-            if(isset($params['_token'])) unset($params['_token']);
-            if(isset($params['_method'])) unset($params['_method']);
+            if (isset($params['_token'])) unset($params['_token']);
+            if (isset($params['_method'])) unset($params['_method']);
 
             CustomerModel::where('user_id', $id)->update($params);
             return response()->json([
@@ -238,39 +238,50 @@ class CustomerController extends Controller
                     'msgField' => $validator->errors()
                 ]);
             }
+
             $file = $request->file('file_user');
 
             $reader = IOFactory::createReader('Xlsx');
             $reader->setReadDataOnly(true);
             $spreadsheet = $reader->load($file->getRealPath());
             $sheet = $spreadsheet->getActiveSheet();
-
             $data = $sheet->toArray(null, false, true, true);
 
             $insert = [];
+            $duplikat = [];
+
             if (count($data) > 1) {
                 foreach ($data as $baris => $value) {
                     if ($baris > 1) {
+                        $username = trim($value['B']);
+
+                        if (CustomerModel::where('username', $username)->exists()) {
+                            $duplikat[] = "Baris $baris - Username '$username' sudah terdaftar";
+                            continue;
+                        }
+
                         $insert[] = [
-                            'nama' => $value['A'],
-                            'username' => $value['B'],
+                            'nama' => trim($value['A']),
+                            'username' => $username,
                             'jk' => $value['C'],
                             'alamat' => $value['D'],
                             'wa' => $value['E'],
                             'level_id' => 2,
-                            'password' => Hash::make("password_".$value['B']),
+                            'password' => Hash::make("password_" . $username),
                             'created_at' => now(),
                         ];
                     }
                 }
 
                 if (count($insert) > 0) {
-                    CustomerModel::insertOrIgnore($insert);
+                    CustomerModel::insert($insert);
                 }
 
                 return response()->json([
-                    'status' => true,
-                    'message' => 'Data berhasil diimport'
+                    'status' => empty($duplikat),
+                    'message' => empty($duplikat)
+                        ? 'Data berhasil diimport'
+                        : "Import sebagian berhasil.<br>" . implode('<br>', $duplikat)
                 ]);
             } else {
                 return response()->json([
@@ -279,8 +290,10 @@ class CustomerController extends Controller
                 ]);
             }
         }
+
         return redirect('/');
     }
+
 
     public function export_excel()
     {
@@ -307,7 +320,7 @@ class CustomerController extends Controller
             $sheet->setCellValue('A' . $baris, $no);
             $sheet->setCellValue('B' . $baris, $value->nama);
             $sheet->setCellValue('C' . $baris, $value->username);
-            $sheet->setCellValue('D' . $baris, $value->jk == 'male'?"Laki-laki":"Perempuan");
+            $sheet->setCellValue('D' . $baris, $value->jk == 'male' ? "Laki-laki" : "Perempuan");
             $sheet->setCellValue('E' . $baris, $value->alamat);
             $sheet->setCellValue('F' . $baris, $value->wa);
             $baris++;
@@ -339,8 +352,8 @@ class CustomerController extends Controller
     public function export_pdf()
     {
         $user = CustomerModel::with('level')
-        ->orderBy('user_id')
-        ->get();
+            ->orderBy('user_id')
+            ->get();
 
         $pdf = Pdf::loadView('customer.export_pdf', ['user' => $user]);
         $pdf->setPaper('a4', 'portrait');
@@ -349,5 +362,4 @@ class CustomerController extends Controller
 
         return $pdf->stream('Data Customer ' . date('Y-m-d H:i:s') . '.pdf');
     }
-
 }

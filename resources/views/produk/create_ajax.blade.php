@@ -9,8 +9,8 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group ">
-                        <label>Kategori</label>
-                        <select class="form-control" id="kategori_id" name="kategori_id" required>
+                        <label style="width: 100%">Kategori</label>
+                        <select class="form-control input_kategori" id="kategori_id" name="kategori_id" required style="width: 100%">
                             <option value="">- Pilih Kategori -</option>
                             @foreach ($kategori as $item)
                                 <option value="{{ $item->kategori_id }}">{{ $item->kategori_nama }}</option>
@@ -20,19 +20,19 @@
                     </div>
                     <div class="form-group">
                         <label>Produk Kode</label>
-                        <input value="" type="text" name="barang_kode" id="barang_kode"
-                            class="form-control" required>
+                        <input value="" type="text" name="barang_kode" id="barang_kode" class="form-control"
+                            required>
                         <small id="error-barang_kode" class="error-text form-text text-danger"></small>
                     </div>
                     <div class="form-group">
                         <label>Produk Nama</label>
-                        <input value="" type="text" name="barang_nama" id="barang_nama"
-                            class="form-control" required>
+                        <input value="" type="text" name="barang_nama" id="barang_nama" class="form-control"
+                            required>
                         <small id="error-barang_nama" class="error-text form-text text-danger"></small>
                     </div>
                     <div class="form-group">
                         <label>Harga</label>
-                        <input value="" type="number" name="harga" id="harga" class="form-control"
+                        <input value="" type="text" name="harga" id="harga" class="form-control"
                             required>
                         <small id="error-harga" class="error-text form-text text-danger"></small>
                     </div>
@@ -50,7 +50,20 @@
         </div>
     </form>
     <script>
+        const hargaInput = document.getElementById('harga');
+
+        hargaInput.addEventListener('input', function(e) {
+            let value = this.value.replace(/\D/g, ''); // Hapus non-digit
+            let formatted = new Intl.NumberFormat('id-ID').format(value);
+            this.value = formatted;
+        });
+    </script>
+    <script>
         $(document).ready(function() {
+            $('.input_kategori').select2({
+                dropdownParent: $('#form-tambah')
+            });
+
             $.validator.addMethod('filesize', function(value, element, param) {
                 if (element.files.length == 0) return true;
                 return this.optional(element) || (element.files[0].size <= param);
@@ -83,6 +96,9 @@
                     }
                 },
                 submitHandler: function(form) {
+                    const hargaRaw = $('#harga').val().replace(/\./g, '');
+                    $('#harga').val(hargaRaw);
+
                     let formData = new FormData(form);
 
                     $.ajax({

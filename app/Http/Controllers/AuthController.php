@@ -44,7 +44,7 @@ class AuthController extends Controller
             }
             return response()->json([
                 'status' => false,
-                'message' => 'Login Gagal'
+                'message' => 'Username atau password salah'
             ]);
         }
 

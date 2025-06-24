@@ -37,8 +37,8 @@
                     </div>
                     <div class="form-group">
                         <label>item</label>
-                        <input type="text" name="item" id="item" value="{{ $stok->item }}"
-                            class="form-control" required>
+                        <input type="text" name="item" id="item" value="{{ $stok->item }}" class="form-control"
+                            required>
                         <small id="error-item" class="error-text form-text text-danger"></small>
                     </div>
                     <div class="form-group">
@@ -49,13 +49,14 @@
                     </div>
                     <div class="form-group">
                         <label>Harga Total</label>
-                        <input type="number" name="harga_total" id="harga_total" value="{{ $stok->harga_total }}"
-                            class="form-control" required>
+                        <input type="text" name="harga_total" id="harga_total"
+                            value="{{ number_format($stok->harga_total, 0, ',', '.') }}" class="form-control" required>
                         <small id="error-harga_total" class="error-text form-text text-danger"></small>
                     </div>
+
                     <div class="form-group">
-                        <label>Supplier</label>
-                        <select name="supplier_id" id="supplier_id" class="form-control" required>
+                        <label style="width: 100%">Supplier</label>
+                        <select name="supplier_id" id="supplier_id" class="form-control" required style="width: 100%">
                             @foreach ($supplier as $supplier)
                                 <option value="{{ $supplier->supplier_id }}"
                                     {{ $stok->supplier_id == $supplier->supplier_id ? 'selected' : '' }}>
@@ -82,6 +83,11 @@
     </form>
 
     <script>
+        $(() => {
+            $('#supplier_id').select2({
+                dropdownParent: $('#form-edit')
+            });
+        })
         $(document).ready(function() {
             $("#form-edit").validate({
                 rules: {
@@ -105,6 +111,9 @@
                     }
                 },
                 submitHandler: function(form) {
+                    let rawHarga = $('#harga_total').val().replace(/\./g, '');
+                    $('#harga_total').val(rawHarga);
+
                     $.ajax({
                         url: form.action,
                         type: form.method,
@@ -147,4 +156,15 @@
             });
         });
     </script>
+    <script>
+        function formatRibuan(nilai) {
+            return nilai.replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        $(document).on('input', '#harga_total', function() {
+            let val = $(this).val();
+            $(this).val(formatRibuan(val));
+        });
+    </script>
+
 @endempty

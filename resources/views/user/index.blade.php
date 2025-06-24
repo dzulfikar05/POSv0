@@ -12,7 +12,7 @@
                         </button>
                         <div class="dropdown-menu" aria-labelledby="importExportDropdown">
                             <button class="dropdown-item" onclick="modalAction('{{ url('/user/import') }}')">
-                                Import User
+                                Import Data
                             </button>
                             <a class="dropdown-item" href="{{ url('/user/export_excel') }}">
                                 <i class="fa fa-file-excel"></i> Export to Excel

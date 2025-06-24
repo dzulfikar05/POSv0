@@ -1,6 +1,6 @@
     <form action="{{ url('/supplier/ajax') }}" method="POST" id="form-tambah">
         @csrf
-        <div id="modal-master" class="modal-dialog " role="document">
+        <div id="modal-master" class="modal-dialog modal-lg" role="document">
             <div class="modal-content ">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel">Tambah Data Supplier</h5>
@@ -22,15 +22,14 @@
                     </div>
                     <div class="form-group">
                         <label>Supplier WA</label>
-                        <input value="" name="supplier_wa" id="supplier_wa" class="form-control" type="number"
+                        <input value="" name="supplier_wa" id="supplier_wa" class="form-control" type="text" placeholder="ex: 628123456789"
                             required>
+                        <small class="form-text text-muted">ex: 628123456789</small>
                         <small id="error-supplier_wa" class="error-text form-text text-danger"></small>
                     </div>
                     <div class="form-group">
                         <label>Supplier Alamat</label>
-                        <textarea name="supplier_alamat" id="supplier_alamat" class="form-control"
-                            required>
-                        </textarea>
+                        <textarea name="supplier_alamat" id="supplier_alamat" class="form-control" required></textarea>
                         <small id="error-supplier_alamat" class="error-text form-text text-danger"></small>
                     </div>
 
@@ -58,8 +57,7 @@
                     },
                     supplier_wa: {
                         required: false,
-                        minlength: 0,
-                        maxlength: 20
+                        pattern: /^(628)[0-9]{7,12}$/
                     },
                     supplier_alamat: {
                         required: false,

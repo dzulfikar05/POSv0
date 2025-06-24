@@ -18,12 +18,12 @@ class AdminController extends Controller
     public function index()
     {
         $breadcrumb = (object) [
-            'title' => 'Daftar Admin',
+            'title' => 'Data Admin',
             'list' => ['Home', 'Admin']
         ];
 
         $page = (object) [
-            'title' => 'Daftar admin yang terdaftar dalam sistem'
+            'title' => ''
         ];
 
         $activeMenu = 'admin';
@@ -164,12 +164,12 @@ class AdminController extends Controller
                 $file = $request->file('photo');
                 $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                 $file->storeAs('public/uploads/photo', $filename);
-                if(isset($params['photo'])) unset($params['photo']);
+                if (isset($params['photo'])) unset($params['photo']);
                 $params['photo'] = $filename;
             }
 
-            if(isset($params['_token'])) unset($params['_token']);
-            if(isset($params['_method'])) unset($params['_method']);
+            if (isset($params['_token'])) unset($params['_token']);
+            if (isset($params['_method'])) unset($params['_method']);
 
             AdminModel::where('user_id', $id)->update($params);
 
@@ -231,8 +231,8 @@ class AdminController extends Controller
                     'msgField' => $validator->errors()
                 ]);
             }
-            $file = $request->file('file_user');
 
+            $file = $request->file('file_user');
             $reader = IOFactory::createReader('Xlsx');
             $reader->setReadDataOnly(true);
             $spreadsheet = $reader->load($file->getRealPath());
@@ -241,21 +241,39 @@ class AdminController extends Controller
             $data = $sheet->toArray(null, false, true, true);
 
             $insert = [];
+            $duplikat = [];
+
             if (count($data) > 1) {
                 foreach ($data as $baris => $value) {
                     if ($baris > 1) {
+                        $username = trim($value['B']);
+
+                        // Cek apakah username sudah ada
+                        $exists = AdminModel::where('username', $username)->exists();
+                        if ($exists) {
+                            $duplikat[] = "Baris $baris - Username '$username' sudah terdaftar";
+                            continue;
+                        }
+
                         $insert[] = [
-                            'nama' => $value['A'],
-                            'username' => $value['B'],
+                            'nama' => trim($value['A']),
+                            'username' => $username,
                             'level_id' => 1,
-                            'password' => Hash::make('password_'.$value['B']),
+                            'password' => Hash::make('password_' . $username),
                             'created_at' => now(),
                         ];
                     }
                 }
 
                 if (count($insert) > 0) {
-                    AdminModel::insertOrIgnore($insert);
+                    AdminModel::insert($insert);
+                }
+
+                if (!empty($duplikat)) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => "Import sebagian berhasil.\n" . implode("\n", $duplikat)
+                    ]);
                 }
 
                 return response()->json([
@@ -269,8 +287,10 @@ class AdminController extends Controller
                 ]);
             }
         }
+
         return redirect('/');
     }
+
 
     public function export_excel()
     {
@@ -324,9 +344,9 @@ class AdminController extends Controller
     public function export_pdf()
     {
         $user = AdminModel::select('nama', 'username', 'level_id')
-        ->with('level')
-        ->orderBy('user_id')
-        ->get();
+            ->with('level')
+            ->orderBy('user_id')
+            ->get();
 
         $pdf = Pdf::loadView('admin.export_pdf', ['user' => $user]);
         $pdf->setPaper('a4', 'portrait');
@@ -335,5 +355,4 @@ class AdminController extends Controller
 
         return $pdf->stream('Data Admin ' . date('Y-m-d H:i:s') . '.pdf');
     }
-
 }

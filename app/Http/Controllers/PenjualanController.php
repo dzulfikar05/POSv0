@@ -22,7 +22,7 @@ class PenjualanController extends Controller
         ];
 
         $page = (object) [
-            'title' => 'Daftar penjualan yang tercatat dalam sistem'
+            'title' => ''
         ];
 
         $activeMenu = 'penjualan';
@@ -33,8 +33,7 @@ class PenjualanController extends Controller
     public function list(Request $request)
     {
         $penjualan = PenjualanModel::with('user', 'customer')
-            ->where('status', '=', 'paid_off')
-            ->orWhere('status', '=', 'completed')
+            ->whereIn('status', ['paid_off', 'completed'])
             ->select([
                 'penjualan_id',
                 'user_id',
@@ -255,6 +254,7 @@ class PenjualanController extends Controller
     public function export_excel(Request $request)
     {
         $penjualan = PenjualanModel::with(['user', 'customer', 'detail.barang'])
+            ->whereIn('status', ['paid_off', 'completed'])
             ->withSum('detail as total_harga', DB::raw('harga * jumlah'))
             ->when($request->tahun, function ($query, $tahun) {
                 $query->whereYear('penjualan_tanggal', $tahun);
@@ -337,6 +337,7 @@ class PenjualanController extends Controller
         $tahun = $request->tahun ?? date('Y');
         $bulan = $request->bulan ?? null;
 
+        // Nama bulan dalam Bahasa Indonesia
         $bulanIndonesia = [
             '01' => 'Januari',
             '02' => 'Februari',
@@ -351,18 +352,24 @@ class PenjualanController extends Controller
             '11' => 'November',
             '12' => 'Desember',
         ];
+
+        // Format nama bulan
         $bulanNama = $bulan ? ($bulanIndonesia[$bulan] ?? $bulan) : 'Semua Bulan';
 
-        $penjualan = PenjualanModel::with(['user', 'detail.barang'])
+        // Ambil data penjualan dengan filter tahun dan bulan
+        $penjualan = PenjualanModel::with(['user', 'customer', 'detail.barang'])
+            ->whereIn('status', ['paid_off', 'completed'])
             ->withSum('detail as total_harga', DB::raw('harga * jumlah'))
-            ->when($request->tahun, function ($q) use ($tahun) {
+            ->when($tahun, function ($q) use ($tahun) {
                 $q->whereYear('penjualan_tanggal', $tahun);
             })
-            ->when($request->bulan, function ($q) use ($bulan) {
+            ->when($bulan, function ($q) use ($bulan) {
                 $q->whereMonth('penjualan_tanggal', $bulan);
             })
+            ->orderByDesc('penjualan_tanggal')
             ->get();
 
+        // Generate PDF dari view
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('penjualan.export_pdf', [
             'penjualan'  => $penjualan,
             'bulanNama'  => $bulanNama,
@@ -370,8 +377,12 @@ class PenjualanController extends Controller
         ]);
 
         $pdf->setPaper('a4', 'portrait');
-        return $pdf->stream('Laporan_Penjualan_' . now()->format('Ymd_His') . '.pdf');
+
+        $filename = 'Laporan_Penjualan_' . ($bulan ? $bulan . '_' : '') . $tahun . '_' . now()->format('His') . '.pdf';
+
+        return $pdf->stream($filename);
     }
+
 
 
     public function print_struk($id)

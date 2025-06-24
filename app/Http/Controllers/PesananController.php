@@ -22,7 +22,7 @@ class PesananController extends Controller
         ];
 
         $page = (object) [
-            'title' => 'Daftar pesanan pelanggan yang tercatat dalam sistem'
+            'title' => ''
         ];
 
         $activeMenu = 'pesanan';
@@ -42,10 +42,8 @@ class PesananController extends Controller
                 'status',
                 DB::raw('(SELECT SUM(harga * jumlah) FROM t_penjualan_detail WHERE t_penjualan_detail.penjualan_id = t_penjualan.penjualan_id) as total_harga')
             ])
-            ->where(function ($q) {
-                $q->where('status', 'validate_payment')
-                    ->orWhere('status', 'rejected');
-            })->orderBy('penjualan_tanggal', 'desc');
+            ->whereIn('status', ['validate_payment', 'rejected'])
+            ->orderBy('penjualan_tanggal', 'desc');
 
 
         if ($request->tahun) {

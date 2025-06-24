@@ -5,25 +5,27 @@
             <div class="modal-header">
                 <h5 class="modal-title">Tambah Data Pesanan</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                    <span>&times;</span>
                 </button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
                     <label>Customer</label>
-                    <select name="customer_id" id="customer_id" class="form-control" required>
+                    <select name="customer_id" id="customer_id" class="form-control customer_id" required style="width: 100%">
                         <option value="">-- Pilih --</option>
-                        @foreach($customers as $row)
+                        @foreach ($customers as $row)
                             <option value="{{ $row->user_id }}">{{ $row->nama }} - {{ $row->wa }}</option>
                         @endforeach
                     </select>
                     <small class="error-text form-text text-danger" id="error-customer_id"></small>
                 </div>
+
                 <div class="form-group">
                     <label>Tanggal Pesanan</label>
-                    <input type="text" class="form-control" disabled value="{{ \Carbon\Carbon::now()->locale('id')->isoFormat('D MMMM YYYY HH:mm') }}">
-
+                    <input type="text" class="form-control" disabled
+                        value="{{ \Carbon\Carbon::now()->locale('id')->isoFormat('D MMMM YYYY HH:mm') }}">
                 </div>
+
                 <hr>
                 <h5>Detail Produk</h5>
                 <table class="table table-bordered" id="detail-barang">
@@ -57,18 +59,20 @@
 <script>
     const barangs = @json($barangs);
 
+    function formatRibuan(angka) {
+        return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
     function hitungTotal() {
         let total = 0;
         $('#detail-barang tbody tr').each(function() {
-            const subtotal = parseFloat($(this).find('.subtotal').val()) || 0;
+            const subtotal = parseFloat($(this).find('.subtotal').val().replace(/\./g, '')) || 0;
             total += subtotal;
         });
-        $('#total-harga').val(total);
+        $('#total-harga').val(formatRibuan(total));
     }
 
     function tambahBaris() {
-        const index = $('#detail-barang tbody tr').length;
-
         let barangOptions = '<option value="">-- Pilih --</option>';
         barangs.forEach(barang => {
             barangOptions += `<option value="${barang.barang_id}" data-harga="${barang.harga}">${barang.barang_nama}</option>`;
@@ -82,13 +86,13 @@
                     </select>
                 </td>
                 <td>
-                    <input type="number" name="harga[]" class="form-control harga" readonly>
+                    <input type="text" name="harga[]" class="form-control harga" readonly>
                 </td>
                 <td>
                     <input type="number" name="jumlah[]" class="form-control jumlah" min="1" value="1">
                 </td>
                 <td>
-                    <input type="number" class="form-control subtotal" readonly>
+                    <input type="text" class="form-control subtotal" readonly>
                 </td>
                 <td>
                     <button type="button" class="btn btn-sm btn-danger hapus-baris">Hapus</button>
@@ -96,57 +100,67 @@
             </tr>`;
 
         $('#detail-barang tbody').append(row);
+
+        // Inisialisasi Select2 untuk dropdown yang baru
+        $('#detail-barang tbody .barang-select').last().select2({
+            dropdownParent: $('#form-tambah')
+        });
     }
 
-    $(document).ready(function() {
-        // function button add
-        $('#tambah-barang').click(tambahBaris);
+    $(document).ready(function () {
+        // Inisialisasi awal select2 untuk customer
+        $('.customer_id').select2({
+            dropdownParent: $('#form-tambah')
+        });
 
-        // onchange barang dipilih, akan mengisi harga
-        $('#detail-barang').on('change', '.barang-select', function() {
+        // Tambah baris produk
+        $('#tambah-barang').on('click', tambahBaris);
+
+        // Ketika produk dipilih
+        $('#detail-barang').on('change', '.barang-select', function () {
             const harga = $(this).find(':selected').data('harga') || 0;
             const row = $(this).closest('tr');
-            row.find('.harga').val(harga);
+            row.find('.harga').val(formatRibuan(harga));
             row.find('.jumlah').trigger('input');
         });
 
-        // menghitung sub total
-        $('#detail-barang').on('input', '.jumlah', function() {
+        // Perubahan jumlah
+        $('#detail-barang').on('input', '.jumlah', function () {
             const row = $(this).closest('tr');
-            // const stok = row.find('.barang-select').find(':selected').data('stok') || 0;
             const jumlah = parseInt(row.find('.jumlah').val()) || 0;
-
-            // if (jumlah > stok) {
-            //     Swal.fire({ icon: 'error', title: 'Oops...', text: 'Jumlah barang melebihi stok' });
-            //     row.find('.jumlah').val(stok);
-            // }
-
-            const harga = parseFloat(row.find('.harga').val()) || 0;
-            const subtotal = harga * jumlah;
-            row.find('.subtotal').val(subtotal);
+            const harga = parseFloat((row.find('.harga').val() || '0').replace(/\./g, '')) || 0;
+            const subtotal = jumlah * harga;
+            row.find('.subtotal').val(formatRibuan(subtotal));
             hitungTotal();
         });
 
-        // delete row
-        $('#detail-barang').on('click', '.hapus-baris', function() {
+        // Hapus baris
+        $('#detail-barang').on('click', '.hapus-baris', function () {
             $(this).closest('tr').remove();
             hitungTotal();
         });
 
-        $("#form-tambah").validate({
-            submitHandler: function(form) {
+        // Submit AJAX
+        $('#form-tambah').validate({
+            submitHandler: function (form) {
+                // Hapus format titik ribuan sebelum submit
+                $('#detail-barang .harga, #detail-barang .subtotal').each(function () {
+                    $(this).val($(this).val().replace(/\./g, ''));
+                });
+                $('#total-harga').val($('#total-harga').val().replace(/\./g, ''));
+
                 $.ajax({
                     url: form.action,
-                    type: form.method,
+                    method: form.method,
                     data: $(form).serialize(),
-                    success: function(response) {
+                    success: function (response) {
                         if (response.status) {
                             $('#myModal').modal('hide');
                             Swal.fire({ icon: 'success', title: 'Berhasil', text: response.message });
                             tablePesanan.ajax.reload();
                         } else {
                             $('.error-text').text('');
-                            $.each(response.msgField, function(prefix, val) {
+                            $.each(response.msgField, function (prefix, val) {
                                 $('#error-' + prefix).text(val[0]);
                             });
                             Swal.fire({ icon: 'error', title: 'Terjadi Kesalahan', text: response.message });
@@ -156,14 +170,14 @@
                 return false;
             },
             errorElement: 'span',
-            errorPlacement: function(error, element) {
+            errorPlacement: function (error, element) {
                 error.addClass('invalid-feedback');
                 element.closest('.form-group').append(error);
             },
-            highlight: function(element) {
+            highlight: function (element) {
                 $(element).addClass('is-invalid');
             },
-            unhighlight: function(element) {
+            unhighlight: function (element) {
                 $(element).removeClass('is-invalid');
             }
         });

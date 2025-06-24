@@ -1,28 +1,32 @@
 @extends('layouts.template')
 
 @section('content')
-    <div class="card card-outline card-primary">
+    <div class="card card-outline card-primary content-card">
         <div class="card-header">
             <h3 class="card-title">{{ $page->title }}</h3>
             <div class="card-tools">
                 <div class="row">
-                    <div class="dropdown mr-2">
-                        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="importExportDropdownPenjualan" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Export
+                    <div class="dropleft mx-2">
+                        <button class="btn btn-outline-primary dropdown-toggle" type="button"
+                            id="importExportDropdownPenjualan" data-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false">
+                            <i class="fa fa-download mr-1"></i> Export
                         </button>
                         <div class="dropdown-menu" aria-labelledby="importExportDropdownPenjualan">
-                            <a class="dropdown-item" id="exportExcelUrl" href="{{ url('/penjualan/export_excel') }}">
-                                <i class="fa fa-file-excel"></i> Export to Excel
+                            <a class="dropdown-item d-flex align-items-center" href="{{ url('/penjualan/export_excel') }}" id="exportExcelUrl">
+                                <i class="fa fa-file-excel text-success mr-2"></i> Export to Excel
                             </a>
-                            <a class="dropdown-item" id="exportPdfUrl" href="{{ url('/penjualan/export_pdf') }}" target="_blank">
-                                <i class="fa fa-file-pdf"></i> Export to PDF
+                            <a class="dropdown-item d-flex align-items-center" href="{{ url('/penjualan/export_pdf') }}" id="exportPdfUrl"
+                                target="_blank">
+                                <i class="fa fa-file-pdf text-danger mr-2"></i> Export to PDF
                             </a>
                         </div>
                     </div>
 
-                    <button onclick="modalAction('{{ url('/penjualan/create_ajax') }}')" class="btn btn-primary mr-2">
+
+                    {{-- <button onclick="modalAction('{{ url('/penjualan/create_ajax') }}')" class="btn btn-primary mr-2">
                         Tambah Data
-                    </button>
+                    </button> --}}
                 </div>
             </div>
 
@@ -30,7 +34,7 @@
         <div class="card-body">
             <div class="row mb-3">
                 <div class="col-md-2">
-                    <select id="filter_tahun" class="form-control">
+                    <select id="filter_tahun" class="form-control filter_tahun">
                         <option value="">Semua Tahun</option>
                         @for ($year = date('Y'); $year >= 2020; $year--)
                             <option value="{{ $year }}" {{ $year == date('Y') ? 'selected' : '' }}>
@@ -39,7 +43,7 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <select id="filter_bulan" class="form-control">
+                    <select id="filter_bulan" class="form-control filter_bulan">
                         <option value="">Semua Bulan</option>
                         @php
                             $bulanIndonesia = [
@@ -90,8 +94,8 @@
             </table>
         </div>
     </div>
-    <div id="myModal" class="modal fade animate shake" tabindex="-1" role="dialog"
-        data-backdrop="static" data-keyboard="false" data-width="75%" aria-hidden="true">
+    <div id="myModal" class="modal fade animate shake" tabindex="-1" role="dialog" data-backdrop="static"
+        data-keyboard="false" data-width="75%" aria-hidden="true">
     </div>
     <div id="confirmModal" class="modal fade animate shake" tabindex="-1" role="dialog" data-backdrop="static"
         data-keyboard="false" aria-hidden="true">
@@ -103,7 +107,16 @@
 
 @push('js')
     <script>
-         $(() => {
+        $(() => {
+            $('.filter_tahun').select2({
+                dropdownParent: $('.content-card')
+            });
+            $('.filter_bulan').select2({
+                dropdownParent: $('.content-card')
+            });
+        })
+
+        $(() => {
             updateExportLinks();
         })
 
@@ -130,7 +143,7 @@
         }
 
         function modalAction(url = '') {
-            $('#myModal').load(url, function () {
+            $('#myModal').load(url, function() {
                 $('#myModal').modal('show');
             });
         }
@@ -191,7 +204,7 @@
         }
 
         var tablePenjualan;
-        $(document).ready(function () {
+        $(document).ready(function() {
             tablePenjualan = $('#table_penjualan').DataTable({
                 processing: true,
                 serverSide: true,
@@ -199,13 +212,12 @@
                     url: "{{ url('penjualan/list') }}",
                     dataType: "json",
                     type: "POST",
-                    data: function (d) {
+                    data: function(d) {
                         d.tahun = $('#filter_tahun').val();
                         d.bulan = $('#filter_bulan').val();
                     }
                 },
-                columns: [
-                    {
+                columns: [{
                         data: "DT_RowIndex",
                         className: "text-center",
                         orderable: false,

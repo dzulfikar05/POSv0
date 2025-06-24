@@ -23,7 +23,7 @@
         <div id="modal-master" class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Hapus Data User</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Hapus Data Produk</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -37,7 +37,7 @@
 
                         <tr>
                             <th class="text-right col-3">Kategori :</th>
-                            <td class="col-9">{{ $barang->kategori->nama }}</td>
+                            <td class="col-9">{{ $barang->kategori->kategori_nama }}</td>
                         </tr>
                         <tr>
                             <th class="text-right col-3">Produk Kode :</th>
@@ -49,7 +49,7 @@
                         </tr>
                         <tr>
                             <th class="text-right col-3">Harga :</th>
-                            <td class="col-9">{{ $barang->harga }}</td>
+                            <td class="col-9">{{ number_format($barang->harga, 0, ',', '.') }}</td>
                         </tr>
                     </table>
                 </div>

@@ -75,7 +75,7 @@
 </head>
 
 <body>
-    <h3 class="text-center">LAPORAN DATA BARANG</h4>
+    <h3 class="text-center">LAPORAN DATA PRODUK</h4>
         <table class="border-all">
             <thead>
                 <tr>

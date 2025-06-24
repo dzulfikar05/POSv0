@@ -39,8 +39,8 @@
                         <small id="error-nama" class="error-text form-text text-danger"></small>
                     </div>
                     <div class="form-group">
-                        <label>Jenis Kelamin</label>
-                        <select name="jk" id="jk" class="form-control" required>
+                        <label style="width: 100%">Jenis Kelamin</label>
+                        <select name="jk" id="jk" class="form-control select-jk" required style="width: 100%">
 
                             <option value="male" {{ $user->jk == 'male' ? 'selected' : '' }}>Laki-laki
                             </option>
@@ -91,6 +91,10 @@
     </form>
     <script>
         $(document).ready(function() {
+            $('.select-jk').select2({
+                dropdownParent: $('#form-edit')
+            });
+
             $.validator.addMethod('filesize', function(value, element, param) {
                 if (element.files.length == 0) return true;
                 return this.optional(element) || (element.files[0].size <= param);
@@ -116,6 +120,7 @@
                     },
                     wa: {
                         required: true,
+                        pattern: /^(628)[0-9]{7,12}$/
                     },
                     password: {
                         minlength: 6,

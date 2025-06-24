@@ -38,6 +38,10 @@
     body {
         font-family: 'Poppins', sans-serif;
     }
+
+    .select2-selection{
+        height: 38px !important;
+    }
 </style>
 
 <body class="hold-transition sidebar-mini">
@@ -124,6 +128,10 @@
         }
         // $('[data-widget="pushmenu"]').PushMenu('toggle');
     </script>
+
+   {{-- Select2 --}}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     @stack('js') <!-- Digunakan untuk memanggil custom js dari perintah push('js') pada masing-masing view -->
 

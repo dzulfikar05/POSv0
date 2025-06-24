@@ -4,14 +4,14 @@
     <div class="col-12 row">
 
         <div class="p-3 col-md-3">
-            <div class="card ">
+            <div class="card dashboard-card">
                 <div class="card-header">
                     <span class="card-title text-left">Filter Data</span>
                 </div>
                 <div class="card-body">
                     <div class="row mb-3">
                         <div class="col-md-4">
-                            <select id="filter_tahun" class="form-control">
+                            <select id="filter_tahun" class="form-control filter_year">
                                 <option value="">Semua Tahun</option>
                                 @for ($year = date('Y'); $year >= 2020; $year--)
                                     <option value="{{ $year }}" {{ $year == date('Y') ? 'selected' : '' }}>
@@ -20,7 +20,7 @@
                             </select>
                         </div>
                         <div class="col-md-8">
-                            <select id="filter_bulan" class="form-control">
+                            <select id="filter_bulan" class="form-control filter_month">
                                 <option value="">Semua Bulan</option>
                                 @php
                                     $bulanIndonesia = [
@@ -123,6 +123,13 @@
         $(() => {
             getCardData();
             getChartData();
+
+            $('.filter_year').select2({
+                dropdownParent: $('.dashboard-card')
+            });
+            $('.filter_month').select2({
+                dropdownParent: $('.dashboard-card')
+            });
         });
 
         $('#filter_tahun, #filter_bulan').on('change', function() {
@@ -258,8 +265,8 @@
                                 tooltip: {
                                     callbacks: {
                                         label: function(tooltipItem) {
-                                            return tooltipItem.label + ": " + formatRupiah(
-                                                tooltipItem.raw);
+                                            return  "Terjual : " +
+                                                tooltipItem.raw;
                                         }
                                     }
                                 }

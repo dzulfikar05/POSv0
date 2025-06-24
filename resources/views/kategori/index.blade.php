@@ -7,20 +7,24 @@
             <div class="card-tools">
                 <div class="row">
                     <div class="dropdown mr-2">
-                        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="importExportDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="importExportDropdown"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Import / Export
                         </button>
                         <div class="dropdown-menu" aria-labelledby="importExportDropdown">
-                            <button class="dropdown-item" onclick="modalAction('{{ url('/kategori/import') }}')">
-                                Import Kategori
+                            <button class="dropdown-item d-flex align-items-center"
+                                onclick="modalAction('{{ url('/kategori/import') }}')">
+                                <i class="fa fa-upload mr-2 text-primary"></i> Import Data
                             </button>
-                            <a class="dropdown-item" href="{{ url('/kategori/export_excel') }}">
-                                <i class="fa fa-file-excel"></i> Export to Excel
+                            <a class="dropdown-item d-flex align-items-center" href="{{ url('/kategori/export_excel') }}">
+                                <i class="fa fa-file-excel mr-2 text-success"></i> Export to Excel
                             </a>
-                            <a class="dropdown-item" href="{{ url('/kategori/export_pdf') }}" target="_blank">
-                                <i class="fa fa-file-pdf"></i> Export to PDF
+                            <a class="dropdown-item d-flex align-items-center" href="{{ url('/kategori/export_pdf') }}"
+                                target="_blank">
+                                <i class="fa fa-file-pdf mr-2 text-danger"></i> Export to PDF
                             </a>
                         </div>
+
                     </div>
 
                     <button onclick="modalAction('{{ url('/kategori/create_ajax') }}')" class="btn btn-primary mr-2">Tambah Data</button>

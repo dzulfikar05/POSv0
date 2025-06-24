@@ -71,7 +71,7 @@
                         <small id="error-wa" class="error-text form-text text-danger"></small>
                     </div>
                     <div class="form-group">
-                        <textarea name="alamat" id="alamat" class="form-control" cols="30" rows="3" placeholder="Alamat"></textarea>
+                        <textarea name="alamat" id="alamat" class="form-control" cols="30" rows="3" placeholder="Alamat" required></textarea>
                         <small id="error-alamat" class="error-text form-text text-danger"></small>
                     </div>
                     <div class="row">

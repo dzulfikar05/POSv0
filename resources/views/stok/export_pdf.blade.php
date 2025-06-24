@@ -89,9 +89,9 @@
             <tr>
                 <th class="text-center">No</th>
                 <th>Tanggal</th>
-                <th>Nama Barang</th>
-                <th>Supplier</th>
+                <th>Nama Item</th>
                 <th class="text-center">Jumlah</th>
+                <th>Supplier</th>
                 <th>Keterangan</th>
                 <th>User</th>
             </tr>
@@ -101,10 +101,10 @@
                 <tr>
                     <td class="text-center">{{ $loop->iteration }}</td>
                     <td>{{ \Carbon\Carbon::parse($s->stok_tanggal)->format('d/m/Y') }}</td>
-                    <td>{{ $s->barang->barang_nama ?? '-' }}</td>
-                    <td>{{ $s->supplier->supplier_nama ?? '-' }}</td>
+                    <td>{{ $s->item ?? '-' }}</td>
                     <td class="text-center">{{ $s->stok_jumlah }}</td>
-                    <td>{{ $s->stok_keterangan }}</td>
+                    <td>{{ $s->supplier->supplier_nama ?? '-' }}</td>
+                    <td>{{ $s->keterangan }}</td>
                     <td>{{ $s->user->nama ?? '-' }}</td>
                 </tr>
             @endforeach

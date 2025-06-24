@@ -34,7 +34,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ url('/produk') }}" class="nav-link {{ $activeMenu == 'barang' ? 'active' : '' }} ">
+                <a href="{{ url('/produk') }}" class="nav-link {{ $activeMenu == 'produk' ? 'active' : '' }} ">
                     <i class="nav-icon far fa-list-alt"></i>
                     <p>Data Produk</p>
                 </a>

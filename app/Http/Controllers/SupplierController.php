@@ -17,12 +17,12 @@ class SupplierController extends Controller
     public function index()
     {
         $breadcrumb = (object) [
-            'title' => 'Daftar Supplier',
+            'title' => 'Data Supplier',
             'list' => ['Home', 'Supplier']
         ];
 
         $page = (object) [
-            'title' => 'Daftar supplier yang terdaftar dalam sistem'
+            'title' => ''
         ];
 
         $activeMenu = 'supplier';
@@ -180,8 +180,8 @@ class SupplierController extends Controller
                     'msgField' => $validator->errors()
                 ]);
             }
-            $file = $request->file('file_supplier');
 
+            $file = $request->file('file_supplier');
             $reader = IOFactory::createReader('Xlsx');
             $reader->setReadDataOnly(true);
             $spreadsheet = $reader->load($file->getRealPath());
@@ -190,36 +190,49 @@ class SupplierController extends Controller
             $data = $sheet->toArray(null, false, true, true);
 
             $insert = [];
+            $duplikat = [];
+
             if (count($data) > 1) {
                 foreach ($data as $baris => $value) {
                     if ($baris > 1) {
+                        $kode = trim($value['A']);
+
+                        if (SupplierModel::where('supplier_kode', $kode)->exists()) {
+                            $duplikat[] = "Baris $baris - Kode '$kode' sudah ada";
+                            continue;
+                        }
+
                         $insert[] = [
-                            'supplier_kode' => $value['A'],
-                            'supplier_nama' => $value['B'],
-                            'supplier_wa' => isEmpty($value['C']) ? (int)$value['C'] : null,
-                            'supplier_alamat' => isEmpty($value['D']) ? $value['D'] : null,
+                            'supplier_kode' => $kode,
+                            'supplier_nama' => trim($value['B']),
+                            'supplier_wa' => !empty($value['C']) ? (int) $value['C'] : null,
+                            'supplier_alamat' => !empty($value['D']) ? trim($value['D']) : null,
                             'created_at' => now(),
                         ];
                     }
                 }
 
                 if (count($insert) > 0) {
-                    SupplierModel::insertOrIgnore($insert);
+                    SupplierModel::insert($insert);
                 }
 
                 return response()->json([
-                    'status' => true,
-                    'message' => 'Data berhasil diimport'
-                ]);
-            } else {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Tidak ada data yang diimport'
+                    'status' => empty($duplikat),
+                    'message' => empty($duplikat)
+                        ? 'Data berhasil diimport.'
+                        : 'Import sebagian berhasil:<br>' . implode('<br>', $duplikat)
                 ]);
             }
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Tidak ada data yang diimport'
+            ]);
         }
+
         return redirect('/');
     }
+
 
     public function export_excel()
     {

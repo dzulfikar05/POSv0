@@ -41,14 +41,13 @@
                         <label>Supplier WA</label>
                         <input value="{{ $supplier->supplier_wa }}" type="number" name="supplier_wa" id="supplier_wa" class="form-control"
                             required>
+                        <small class="form-text text-muted">ex: 628123456789</small>
                         <small id="error-supplier_wa" class="error-text form-text text-danger"></small>
+
                     </div>
                     <div class="form-group">
                         <label>Supplier Alamat</label>
-                        <textarea name="supplier_alamat" id="supplier_alamat" class="form-control"
-                            required>
-                            {{ $supplier->supplier_alamat }}
-                        </textarea>
+                        <textarea name="supplier_alamat" id="supplier_alamat" class="form-control" required>{{ $supplier->supplier_alamat }}</textarea>
                         <small id="error-supplier_alamat" class="error-text form-text text-danger"></small>
                     </div>
 
@@ -76,8 +75,7 @@
                     },
                     supplier_wa: {
                         required: false,
-                        minlength: 0,
-                        maxlength: 20
+                        pattern: /^(628)[0-9]{7,12}$/
                     },
                     supplier_alamat: {
                         required: false,

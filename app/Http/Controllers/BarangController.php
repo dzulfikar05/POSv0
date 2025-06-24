@@ -159,7 +159,7 @@ class BarangController extends Controller
 
     public function confirm_ajax($id)
     {
-        $barang = BarangModel::find($id);
+        $barang = BarangModel::with('kategori')->find($id);
         return view('produk.confirm_ajax', ['barang' => $barang]);
     }
 
@@ -189,60 +189,73 @@ class BarangController extends Controller
     }
 
     public function import_ajax(Request $request)
-    {
-        if ($request->ajax() || $request->wantsJson()) {
-            $rules = [
-                'file_barang' => ['required', 'mimes:xlsx', 'max:1024']
-            ];
+{
+    if ($request->ajax() || $request->wantsJson()) {
+        $rules = [
+            'file_barang' => ['required', 'mimes:xlsx', 'max:1024']
+        ];
 
-            $validator = Validator::make($request->all(), $rules);
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Validasi Gagal',
-                    'msgField' => $validator->errors()
-                ]);
-            }
-            $file = $request->file('file_barang');
-
-            $reader = IOFactory::createReader('Xlsx');
-            $reader->setReadDataOnly(true);
-            $spreadsheet = $reader->load($file->getRealPath());
-            $sheet = $spreadsheet->getActiveSheet();
-
-            $data = $sheet->toArray(null, false, true, true);
-
-            $insert = [];
-            if (count($data) > 1) {
-                foreach ($data as $baris => $value) {
-                    if ($baris > 1) {
-                        $insert[] = [
-                            'kategori_id' => $value['A'],
-                            'barang_kode' => $value['B'],
-                            'barang_nama' => $value['C'],
-                            'harga' => $value['D'],
-                            'created_at' => now(),
-                        ];
-                    }
-                }
-
-                if (count($insert) > 0) {
-                    BarangModel::insertOrIgnore($insert);
-                }
-
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Data berhasil diimport'
-                ]);
-            } else {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Tidak ada data yang diimport'
-                ]);
-            }
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validasi Gagal',
+                'msgField' => $validator->errors()
+            ]);
         }
-        return redirect('/');
+
+        $file = $request->file('file_barang');
+        $reader = IOFactory::createReader('Xlsx');
+        $reader->setReadDataOnly(true);
+        $spreadsheet = $reader->load($file->getRealPath());
+        $sheet = $spreadsheet->getActiveSheet();
+        $data = $sheet->toArray(null, false, true, true);
+
+        $insert = [];
+        $duplikat = [];
+
+        if (count($data) > 1) {
+            foreach ($data as $baris => $value) {
+                if ($baris > 1) {
+                    $barangKode = trim($value['B']);
+
+                    // Cek apakah barang_kode sudah ada
+                    $exists = BarangModel::where('barang_kode', $barangKode)->exists();
+                    if ($exists) {
+                        $duplikat[] = "Baris $baris - Kode barang '$barangKode' sudah terdaftar";
+                        continue;
+                    }
+
+                    $insert[] = [
+                        'kategori_id' => $value['A'],
+                        'barang_kode' => $barangKode,
+                        'barang_nama' => trim($value['C']),
+                        'harga' => $value['D'],
+                        'created_at' => now(),
+                    ];
+                }
+            }
+
+            if (count($insert) > 0) {
+                BarangModel::insert($insert);
+            }
+
+            return response()->json([
+                'status' => empty($duplikat),
+                'message' => empty($duplikat)
+                    ? 'Data berhasil diimport'
+                    : "Import sebagian berhasil.<br>" . implode('<br>', $duplikat)
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'Tidak ada data yang diimport'
+            ]);
+        }
     }
+
+    return redirect('/');
+}
 
     public function export_excel()
     {

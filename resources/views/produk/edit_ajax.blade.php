@@ -2,9 +2,10 @@
     <div id="modal-master" class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Kesalahan</h5>
-                <button type="button" class="close" data-dismiss="modal" aria- label="Close"><span
-                        aria-hidden="true">&times;</span></button>
+                <h5 class="modal-title">Kesalahan</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
                 <div class="alert alert-danger">
@@ -20,14 +21,15 @@
         <div id="modal-master" class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Edit Data Produk</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                            aria-hidden="true">&times;</span></button>
+                    <h5 class="modal-title">Edit Data Produk</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group ">
-                        <label>Level</label>
-                        <select class="form-control" id="kategori_id" name="kategori_id" required>
+                    <div class="form-group">
+                        <label style="width: 100%">Kategori</label>
+                        <select class="form-control input_kategori" id="kategori_id" name="kategori_id" required style="width: 100%">
                             <option value="">- Pilih Level -</option>
                             @foreach ($kategori as $item)
                                 <option value="{{ $item->kategori_id }}" @if ($item->kategori_id == $barang->kategori_id) selected @endif>
@@ -39,20 +41,17 @@
                     </div>
                     <div class="form-group">
                         <label>Produk Kode</label>
-                        <input value="{{ $barang->barang_kode }}" type="text" name="barang_kode" id="barang_kode"
-                            class="form-control" required>
+                        <input value="{{ $barang->barang_kode }}" type="text" name="barang_kode" id="barang_kode" class="form-control" required>
                         <small id="error-barang_kode" class="error-text form-text text-danger"></small>
                     </div>
                     <div class="form-group">
                         <label>Produk Nama</label>
-                        <input value="{{ $barang->barang_nama }}" type="text" name="barang_nama" id="barang_nama"
-                            class="form-control" required>
+                        <input value="{{ $barang->barang_nama }}" type="text" name="barang_nama" id="barang_nama" class="form-control" required>
                         <small id="error-barang_nama" class="error-text form-text text-danger"></small>
                     </div>
                     <div class="form-group">
                         <label>Harga</label>
-                        <input value="{{ $barang->harga }}" type="number" name="harga" id="harga"
-                            class="form-control" required>
+                        <input value="{{ number_format($barang->harga, 0, ',', '.') }}" type="text" name="harga" id="harga" class="form-control format-rupiah" required>
                         <small id="error-harga" class="error-text form-text text-danger"></small>
                     </div>
                     <div class="form-group">
@@ -75,9 +74,24 @@
             </div>
         </div>
     </form>
+
     <script>
-        $(document).ready(function() {
-            $.validator.addMethod('filesize', function(value, element, param) {
+        $(document).ready(function () {
+            $('.input_kategori').select2({
+                dropdownParent: $('#form-edit')
+            });
+
+            // Format angka ribuan saat input diketik
+            $('#harga').on('input', function () {
+                let value = $(this).val().replace(/\D/g, '');
+                $(this).val(formatRibuan(value));
+            });
+
+            function formatRibuan(angka) {
+                return angka.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            }
+
+            $.validator.addMethod('filesize', function (value, element, param) {
                 if (element.files.length == 0) return true;
                 return this.optional(element) || (element.files[0].size <= param);
             }, 'Ukuran file maksimal 2 MB');
@@ -108,7 +122,10 @@
                         filesize: 2048000
                     }
                 },
-                submitHandler: function(form) {
+                submitHandler: function (form) {
+                    // Hapus titik pada input harga sebelum kirim ke server
+                    form.querySelector('#harga').value = form.querySelector('#harga').value.replace(/\./g, '');
+
                     let formData = new FormData(form);
                     $.ajax({
                         url: form.action,
@@ -116,7 +133,7 @@
                         data: formData,
                         contentType: false,
                         processData: false,
-                        success: function(response) {
+                        success: function (response) {
                             if (response.status) {
                                 $('#myModal').modal('hide');
                                 Swal.fire({
@@ -127,7 +144,7 @@
                                 tableProduk.ajax.reload();
                             } else {
                                 $('.error-text').text('');
-                                $.each(response.msgField, function(prefix, val) {
+                                $.each(response.msgField, function (prefix, val) {
                                     $('#error-' + prefix).text(val[0]);
                                 });
                                 Swal.fire({
@@ -141,14 +158,14 @@
                     return false;
                 },
                 errorElement: 'span',
-                errorPlacement: function(error, element) {
+                errorPlacement: function (error, element) {
                     error.addClass('invalid-feedback');
                     element.closest('.form-group').append(error);
                 },
-                highlight: function(element, errorClass, validClass) {
+                highlight: function (element, errorClass, validClass) {
                     $(element).addClass('is-invalid');
                 },
-                unhighlight: function(element, errorClass, validClass) {
+                unhighlight: function (element, errorClass, validClass) {
                     $(element).removeClass('is-invalid');
                 }
             });
