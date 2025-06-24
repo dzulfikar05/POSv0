@@ -57,7 +57,7 @@
                         <div class="form-group">
                             <label>Foto Profil (opsional)</label>
                             <input type="file" name="photo" class="form-control" accept="image/*">
-                            <small class="form-text text-muted">Kosongkan jika tidak ingin mengganti foto</small>
+                            <small class="form-text text-muted">Abaikan jika tidak ingin mengganti foto</small>
                             <small id="error-photo" class="form-text text-danger"></small>
                         </div>
                         @if ($auth->photo)
@@ -71,7 +71,9 @@
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-warning" data-dismiss="modal">Tutup</button>
-                        <button type="button" onclick="updateProfile()" class="btn btn-primary">Simpan</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+
+                        {{-- <button type="button" onclick="updateProfile()" class="btn btn-primary">Simpan</button> --}}
                     </div>
                 </form>
 
@@ -143,3 +145,87 @@
 
     }
 </script>
+
+<script src="{{ asset('adminlte/plugins/jquery-validation/jquery.validate.min.js') }}"></script>
+<script src="{{ asset('adminlte/plugins/jquery-validation/additional-methods.min.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        $('#form-profile').validate({
+            rules: {
+                username: {
+                    required: true,
+                    minlength: 4,
+                    maxlength: 20
+                },
+                nama: {
+                    required: true,
+                    minlength: 3,
+                    maxlength: 50
+                },
+                jk: {
+                    required: true
+                },
+                alamat: {
+                    required: true
+                },
+                wa: {
+                    required: true,
+                    pattern: /^(08|628)[0-9]{7,12}$/
+                },
+                password: {
+                    minlength: 6,
+                    maxlength: 20
+                },
+                photo: {
+                    extension: "jpg|jpeg|png|webp"
+                }
+            },
+            messages: {
+                username: {
+                    required: "Username wajib diisi",
+                    minlength: "Minimal 4 karakter",
+                    maxlength: "Maksimal 20 karakter"
+                },
+                nama: {
+                    required: "Nama wajib diisi",
+                    minlength: "Minimal 3 karakter",
+                    maxlength: "Maksimal 50 karakter"
+                },
+                jk: {
+                    required: "Jenis kelamin wajib dipilih"
+                },
+                alamat: {
+                    required: "Alamat wajib diisi"
+                },
+                wa: {
+                    required: "Nomor WhatsApp wajib diisi",
+                    pattern: "Masukkan nomor yang valid, contoh: 628123456789"
+                },
+                password: {
+                    minlength: "Minimal 6 karakter",
+                    maxlength: "Maksimal 20 karakter"
+                },
+                photo: {
+                    extension: "Hanya file gambar (jpg, jpeg, png, webp) yang diperbolehkan"
+                }
+            },
+            errorElement: 'small',
+            errorClass: 'text-danger',
+            errorPlacement: function (error, element) {
+                var id = element.attr('name');
+                $('#error-' + id).text(error.text());
+            },
+            highlight: function (element) {
+                $(element).addClass('is-invalid');
+            },
+            unhighlight: function (element) {
+                $(element).removeClass('is-invalid');
+            },
+            submitHandler: function (form) {
+                updateProfile(); // Jalankan fungsi jika valid
+                return false; // Hindari submit default
+            }
+        });
+    });
+</script>
+

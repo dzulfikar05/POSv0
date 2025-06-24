@@ -18,7 +18,7 @@
         <div class="card card-outline card-primary">
             <div class="card-header text-center"><a href="{{ url('/') }}" class="h1"><b>Point</b> of Sale</a></div>
             <div class="card-body">
-                <p class="login-box-msg">Sign in to start your session</p>
+                <p class="login-box-msg">Login untuk mengakses sistem</p>
                 <form action="{{ url('login') }}" method="POST" id="form-login">
                     @csrf
                     <div class="input-group mb-3">
@@ -26,7 +26,7 @@
                             placeholder="Username">
                         <div class="input-group-append">
                             <div class="input-group-text">
-                                <span class="fas fa-envelope"></span>
+                                <span class="fas fa-user"></span>
                             </div>
                         </div>
                         <small id="error-username" class="error-text text-danger"></small>
@@ -48,12 +48,12 @@
                             </div>
                         </div> --}}
                         <div class="col-12">
-                            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                            <button type="submit" class="btn btn-primary btn-block">Masuk</button>
                         </div>
                         </div>
                 </form>
                 <p class="mt-3 mb-1">
-                    Dont have an account? <a href="{{ url('register') }}"> Register</a>
+                    Belum memiliki akun? <a href="{{ url('register') }}"> Daftar</a>
                 </p>
             </div>
             </div>

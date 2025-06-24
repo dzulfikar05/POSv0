@@ -18,6 +18,7 @@
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="{{ asset('adminlte/plugins/fontawesome-free/css/all.min.css') }}">
     <!-- DataTables -->
@@ -33,6 +34,11 @@
     @stack('css') <!-- Digunakan untuk memanggil custom css dari perintah push('css') pada masing-masing view -->
 
 </head>
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+    }
+</style>
 
 <body class="hold-transition sidebar-mini">
     <!-- Site wrapper -->

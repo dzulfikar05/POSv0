@@ -248,7 +248,7 @@
                         searchable: true,
                         render: function(data) {
                             if (data == 'paid_off') {
-                                return `<span style="font-size:12px" class="badge badge-warning">Lunas - Disiapkan</span>`;
+                                return `<span style="font-size:12px" class="badge badge-primary">Lunas - Disiapkan</span>`;
                             } else if (data == 'completed') {
                                 return `<span style="font-size:12px" class="badge badge-success">Selesai</span>`;
                             }

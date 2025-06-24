@@ -70,7 +70,7 @@
                     <span class="card-title text-left">Total Pembelanjaan</span>
                 </div>
                 <div class="card-body">
-                    <span id="pembelanjaan" class="font-weight-bold h1 text-muted">
+                    <span id="pembelanjaan" class="font-weight-bold h1 text-muted" style="color: #8b8b8b !important">
 
                     </span>
                 </div>

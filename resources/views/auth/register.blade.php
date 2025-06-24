@@ -9,8 +9,7 @@
         href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <link rel="stylesheet" href="{{ asset('adminlte/plugins/fontawesome-free/css/all.min.css') }}">
     <link rel="stylesheet" href="{{ asset('adminlte/plugins/icheck-bootstrap/icheck-bootstrap.min.css') }}">
-    <link rel="stylesheet"
-        href="{{ asset('adminlte/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('adminlte/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.min.css') }}">
 </head>
 
@@ -18,27 +17,29 @@
     <div class="register-box">
         <div class="card card-outline card-primary">
             <div class="card-header text-center">
-                <a href="{{ url('/') }}" class="h1"><b>Admin</b>LTE</a>
+                <a href="{{ url('/') }}" class="h1"><b>Point</b> of Sale</a>
             </div>
             <div class="card-body">
-                <p class="login-box-msg">Register a new membership</p>
+                <p class="login-box-msg">Daftar akun untuk mengakses sistem</p>
 
                 <form action="{{ url('register') }}" method="POST" id="form-register">
                     @csrf
                     <div class="input-group mb-3">
-                        <input type="text" id="name" name="name" class="form-control" placeholder="Full name">
+                        <input type="text" id="name" name="name" class="form-control"
+                            placeholder="Full name">
                         <div class="input-group-append">
                             <div class="input-group-text">
-                                <span class="fas fa-user"></span>
+                                <span class="fas fa-user-circle"></span>
                             </div>
                         </div>
                         <small id="error-name" class="error-text text-danger"></small>
                     </div>
                     <div class="input-group mb-3">
-                        <input type="text" id="username" name="username" class="form-control" placeholder="Username">
+                        <input type="text" id="username" name="username" class="form-control"
+                            placeholder="Username">
                         <div class="input-group-append">
                             <div class="input-group-text">
-                                <span class="fas fa-envelope"></span>
+                                <span class="fas fa-user"></span>
                             </div>
                         </div>
                         <small id="error-username" class="error-text text-danger"></small>
@@ -65,9 +66,8 @@
                     </div>
 
                     <div class="form-group">
-                        <input  type="text" name="wa" id="wa" class="form-control" placeholder="Whatsapp, ex: 628123456789"
-                            required>
-                        {{-- <small class="form-text text-muted">ex: 628123456789</small> --}}
+                        <input type="text" name="wa" id="wa" class="form-control"
+                            placeholder="Whatsapp, ex: 628123456789" required>
                         <small id="error-wa" class="error-text form-text text-danger"></small>
                     </div>
                     <div class="form-group">
@@ -81,7 +81,7 @@
                     </div>
                 </form>
 
-                <a href="{{ url('login') }}" class="text-center">I already have a account</a>
+                <a href="{{ url('login') }}" class="text-center">Saya sudah punya akun</a>
             </div>
         </div>
     </div>
@@ -119,6 +119,7 @@
                     },
                     wa: {
                         required: true,
+                        pattern: /^(08|62)[1-9][0-9]{7,11}$/
                     },
                     password: {
                         required: true,
@@ -136,6 +137,10 @@
                         required: "Username wajib diisi",
                         minlength: "Username minimal 4 karakter",
                         maxlength: "Username maksimal 20 karakter"
+                    },
+                    wa: {
+                        required: "Nomor WhatsApp wajib diisi",
+                        pattern: "Masukkan nomor WhatsApp yang valid (diawali 08 dan hanya angka)"
                     },
                     password: {
                         required: "Password wajib diisi",
@@ -185,7 +190,12 @@
                 errorElement: 'span',
                 errorPlacement: function(error, element) {
                     error.addClass('invalid-feedback');
-                    element.closest('.input-group').append(error);
+
+                    if (element.parent('.input-group').length) {
+                        element.parent('.input-group').after(error);
+                    } else {
+                        element.after(error);
+                    }
                 },
                 highlight: function(element) {
                     $(element).addClass('is-invalid');

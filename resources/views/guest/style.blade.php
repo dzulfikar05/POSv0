@@ -128,6 +128,22 @@
         transition: all 0.3s ease;
     }
 
+    .header-icon .badge {
+        position: absolute;
+        top: -6px;
+        right: -10px;
+        font-size: 10px;
+        padding: 2px 5px;
+        border-radius: 999px;
+        background-color: red;
+        color: white;
+    }
+
+    .header-icon i {
+        vertical-align: middle;
+    }
+
+
     .header-icon:hover {
         transform: scale(1.1);
     }
@@ -149,6 +165,14 @@
         align-items: center;
         transition: all 0.3s ease;
     }
+
+    .user-profile span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100px;
+    }
+
 
     .user-profile:hover {
         transform: scale(1.05);
@@ -502,7 +526,131 @@
     .text-overlay {
         background: rgba(0, 0, 0, 0.5);
         /* Latar belakang hitam dengan opacity */
-        border-radius: 0px  0px  8px 8px;
+        border-radius: 0px 0px 8px 8px;
         /* Opsional, untuk sudut yang lebih halus */
     }
+
+/* RESPONSIVE: Navbar untuk mobile */
+@media (max-width: 768px) {
+    .navbar-search {
+        width: 100%;
+        margin: 10px 0;
+    }
+
+    .navbar-search .form-control {
+        padding-left: 35px;
+        font-size: 14px;
+    }
+
+    .search-icon {
+        top: 8px;
+        left: 12px;
+        font-size: 14px;
+    }
+
+    /* .user-profile img {
+        width: 30px;
+        height: 30px;
+        margin-right: 5px;
+    } */
+
+    .user-profile span {
+        display: none; /* Sembunyikan nama user untuk mobile */
+    }
+
+    .navbar-nav .nav-link {
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+
+    .header-icon {
+        font-size: 1.2rem;
+        margin-right: 10px;
+    }
+
+    .navbar-collapse {
+        background-color: #0088ff; /* agar collapsible menu tetap mudah dibaca */
+        padding: 10px;
+        border-radius: 0 0 10px 10px;
+    }
+
+    .navbar-toggler {
+        padding: 5px 10px;
+    }
+
+}
+
+@media (max-width: 768px) {
+    .header-icon i {
+        font-size: 20px !important; /* pastikan semua icon ukurannya sama */
+    }
+
+    .user-profile img {
+        width: 30px !important;
+        height: 30px !important;
+    }
+
+    .user-profile span {
+        display: none !important; /* nama user tidak ditampilkan di mobile */
+    }
+
+    .navbar-brand {
+        padding: 0.3rem 0.5rem;
+    }
+
+    .navbar-nav .nav-link {
+        margin-top:12px;
+        padding: 0.5rem;
+    }
+
+    .navbar-toggler-icon {
+        margin-left: -26px !important;
+    }
+
+    .img-banner{
+        height: 200px !important;
+    }
+
+    #hero-carousel{
+        margin-top: 20px !important;
+    }
+
+    .text-name_product {
+        font-size: 14px !important;
+    }
+
+    .list-product{
+        margin-top: -200px !important;
+    }
+
+    .history-content{
+        font-size: 12px !important;
+    }
+
+       .card-body {
+        padding: 0.75rem 1rem;
+    }
+
+    .history-content {
+        font-size: 0.85rem;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+    }
+
+    .input-group .form-control-sm {
+        font-size: 0.85rem;
+        height: 30px;
+    }
+    .btn-delete-card{
+        margin-left: 14px
+    }
+
+    .text-list-product{
+        font-size:18px !important
+    }
+}
+
+
 </style>

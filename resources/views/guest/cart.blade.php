@@ -16,7 +16,7 @@
                     </div>
                 </div>
                 <div class="modal-footer action-button">
-                    @if(!empty($cart))
+                    @if (!empty($cart))
                         <button type="button" class="btn btn-warning" onclick="updateCart()">Simpan Data</button>
                         <button type="button" class="btn btn-primary" onclick="onCheckout()">Checkout</button>
                     @endif
@@ -29,7 +29,7 @@
 <script>
     onShowCart = () => {
         let auth = '{{ $auth }}';
-        if(!auth){
+        if (!auth) {
             window.location.href = "{{ url('/login') }}";
             return;
         }
@@ -37,64 +37,85 @@
         let html = ``;
         let total = 0;
 
-        if(cart.length > 0) {
-            $('.cart-count').text(cart.length);
-        }
+        $('.cart-count').text(cart.length);
 
-        if(cart.length == 0) {
+        if (cart.length === 0) {
             $('.action-button').hide();
-        }else{
+
+            html = `
+            <div class="text-center py-5">
+                <i class="fas fa-shopping-cart fa-3x mb-3 text-muted"></i>
+                <p class="text-muted mb-0">Keranjang belanja Anda kosong</p>
+            </div>
+        `;
+        } else {
             $('.action-button').show();
-        }
 
-        $.each(cart, function(index, val) {
-            let url = val.barang?.image ? `/storage/uploads/product/${val.barang?.image}` :
-                'No_Image_Available.jpg';
-            let subtotal = val.harga * val.jumlah;
-            total += subtotal;
+            $.each(cart, function(index, val) {
+                let url = val.barang?.image ?
+                    `/storage/uploads/product/${val.barang?.image}` :
+                    'No_Image_Available.jpg';
+                let subtotal = val.harga * val.jumlah;
+                total += subtotal;
 
-            html += `
-             <div class="card mb-3">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-2">
-                        <img src="${url}" alt="Product Image" class="img-fluid" style="object-fit: cover; width: 80px; height: 80px;">
-                    </div>
-                    <div class="col-4">
-                        <p class="mb-1" style="font-weight: bold;">${val.barang?.barang_nama ?? 'Nama Barang'}</p>
-                        <p class="text-muted" style="font-size: 0.9rem;">Harga Satuan: ${formatRupiah(val.harga)}</p>
-                    </div>
-                    <div class="col-3 text-center">
-                        <div class="input-group justify-content-center">
-                            <button class="btn btn-outline-secondary btn-sm" onclick="decreaseQtyCart(${index})">-</button>
-                            <input type="text" class="form-control form-control-sm text-center" value="${val.jumlah}" readonly style="max-width: 50px;">
-                            <button class="btn btn-outline-secondary btn-sm" onclick="increaseQtyCart(${index})">+</button>
-                        </div>
-                    </div>
-                    <div class="col-2 text-end">
-                        <p class="mb-1">${formatRupiah(subtotal)}</p>
-                        <button class="btn btn-link text-danger btn-sm" onclick="removeItemCart(${index})">Hapus</button>
-                    </div>
+                html += `
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="row align-items-center text-center text-md-left">
+            <!-- Gambar Produk -->
+            <div class="col-12 col-md-2 mb-2 mb-md-0">
+                <img src="${url}" alt="Product Image" class="img-fluid rounded" style="object-fit: cover; width: 80px; height: 80px;">
+            </div>
+
+            <!-- Nama & Harga -->
+            <div class="col-12 col-md-4 mb-2 mb-md-0">
+                <p class="mb-1 font-weight-bold history-content">${val.barang?.barang_nama ?? 'Nama Barang'}</p>
+                <p class="text-muted history-content" style="font-size: 0.9rem;">Harga Satuan: ${formatRupiah(val.harga)}</p>
+            </div>
+
+            <!-- Input Jumlah -->
+            <div class="col-12 col-md-3 mb-2 mb-md-0">
+                <div class="input-group justify-content-center">
+                    <button class="btn btn-outline-secondary btn-sm history-content" onclick="decreaseQtyCart(${index})">-</button>
+                    <input type="text" class="form-control form-control-sm history-content text-center mx-1" value="${val.jumlah}" readonly style="max-width: 50px;">
+                    <button class="btn btn-outline-secondary btn-sm history-content" onclick="increaseQtyCart(${index})">+</button>
+                </div>
+            </div>
+
+            <!-- Subtotal & Hapus -->
+            <div class="col-12 col-md-3">
+                <div class="d-flex justify-content-center justify-content-md-between align-items-center">
+                    <span class="me-2 history-content">${formatRupiah(subtotal)}</span>
+                    <button class="btn btn-link text-danger btn-sm p-0 btn-delete-card" onclick="removeItemCart(${index})" title="Hapus">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
             </div>
         </div>
-            `;
-        })
+    </div>
+</div>
 
-        html += `
+            `;
+            });
+
+            html += `
             <div class="card">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Total Harga</h5>
-                    <h5 class="mb-0 text-primary " style="font-weight: bold;">${formatRupiah(total)}</h5>
+                    <h5 class="mb-0 text-primary font-weight-bold">${formatRupiah(total)}</h5>
                 </div>
             </div>
         `;
+        }
 
         $('#cart-body').html(html);
-
         $('#cartModal').modal('show');
-    }
 
+        let countLength = $('.cart-count').text();
+        if (countLength == 0 || countLength == "0") {
+            $('.cart-count').addClass('d-none');
+        }
+    }
 
     decreaseQtyCart = (index) => {
         if (cart[index].jumlah > 1) {
@@ -164,27 +185,27 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                url: "{{ url('public/checkout') }}",
-                type: 'POST',
-                dataType: 'json',
-                success: function(res) {
-                    if (res.status) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil',
-                            text: res.message
-                        }).then(function() {
-                            location.reload();
-                        })
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Terjadi Kesalahan',
-                            text: res.message
-                        });
+                    url: "{{ url('public/checkout') }}",
+                    type: 'POST',
+                    dataType: 'json',
+                    success: function(res) {
+                        if (res.status) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil',
+                                text: res.message
+                            }).then(function() {
+                                location.reload();
+                            })
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Terjadi Kesalahan',
+                                text: res.message
+                            });
+                        }
                     }
-                }
-            })
+                })
             }
         })
     }

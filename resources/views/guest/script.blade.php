@@ -31,9 +31,9 @@
                             <div class="container py-5">
                                 <div class="row align-items-center">
                                     <div class="col-md-12 text-center position-relative">
-                                        <img src="{{ asset('storage/uploads/product/${data[i].image}') }}" alt="" class="img-fluid" style="width: 100% ; height: 500px; object-fit: cover">
+                                        <img src="{{ asset('storage/uploads/product/${data[i].image}') }}" alt="" class="img-fluid img-banner" style="width: 100% ; height: 500px; object-fit: cover; border-radius: 10px 10px 0px 0px;">
                                         <div class="text-overlay p-3 text-white">
-                                            <h3 class="mb-1">${data[i].barang_nama}</h3>
+                                            <h3 class="mb-1 text-name_product">${data[i].barang_nama}</h3>
                                             <p>${data[i]?.deskripsi ?? ''}</p>
                                         </div>
                                     </div>

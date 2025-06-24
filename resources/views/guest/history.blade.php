@@ -81,18 +81,18 @@
                         html += `
                                 <div class="card mb-3">
                                     <div class="card-body">
-                                    <div class="d-flex justify-content-between">
+                                    <div class="d-flex justify-content-between ">
                                         <div>
-                                        <h5 class="card-title mb-1">Kode: ${penjualan.penjualan_kode}</h5>
-                                        <p class="text-muted mb-1" style="font-size:.9rem">
+                                        <h5 class="card-title mb-1 history-content">Kode: ${penjualan.penjualan_kode}</h5>
+                                        <p class="text-muted mb-1 history-content" style="font-size:.9rem">
                                             Tanggal: ${penjualan.penjualan_tanggal ? formatTanggalIndo(penjualan.penjualan_tanggal) : '-'}
                                         </p>
-                                        <p class="text-muted mb-1" style="font-size:.9rem">
+                                        <p class="text-muted mb-1 history-content" style="font-size:.9rem">
                                             Total Item: ${penjualan.detail.length} barang
                                         </p>
                                         ${badge}
                                         </div>
-                                        <button class="btn btn-sm btn-outline-primary"
+                                        <button class="btn btn-sm btn-outline-primary history-content"
                                                 data-toggle="collapse"
                                                 data-target="#detail-${penjualan.penjualan_id}">
                                         Lihat Detail
@@ -106,12 +106,12 @@
                                 <li class="list-group-item">
                                 <div class="d-flex justify-content-between">
                                     <div>
-                                    <strong>${item.barang?.barang_nama}</strong>
-                                    <div class="text-muted" style="font-size:.85rem">
+                                    <strong class="history-content">${item.barang?.barang_nama}</strong>
+                                    <div class="text-muted history-content" style="font-size:.85rem">
                                         Jumlah: ${item.jumlah} × ${formatRupiah(item.harga)}
                                     </div>
                                     </div>
-                                    <div>${formatRupiah(item.harga * item.jumlah)}</div>
+                                    <div class="history-content">${formatRupiah(item.harga * item.jumlah)}</div>
                                 </div>
                                 </li>`;
                         });
@@ -122,7 +122,16 @@
                         </div>`;
                     });
                 } else {
-                    html = `<div class="text-center text-muted">Belum ada riwayat belanja.</div>`;
+                   html = `
+                    <div class="card my-3">
+                        <div class="card-body d-flex flex-column align-items-center justify-content-center text-center text-muted py-4">
+                            <i class="fas fa-shopping-cart fa-2x mb-3"></i>
+                            <h6 class="mb-1">Belum ada riwayat belanja</h6>
+                            <p class="mb-0" style="font-size: 0.9rem;">Yuk mulai belanja sekarang untuk menikmati berbagai produk terbaik!</p>
+                        </div>
+                    </div>
+                    `;
+
                 }
 
                 $('#history-body').html(html);

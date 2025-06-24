@@ -42,9 +42,9 @@ class PesananController extends Controller
                 'status',
                 DB::raw('(SELECT SUM(harga * jumlah) FROM t_penjualan_detail WHERE t_penjualan_detail.penjualan_id = t_penjualan.penjualan_id) as total_harga')
             ])
-            ->where(function($q){
-                $q->where('status','validate_payment')
-                  ->orWhere('status','rejected');
+            ->where(function ($q) {
+                $q->where('status', 'validate_payment')
+                    ->orWhere('status', 'rejected');
             })->orderBy('penjualan_tanggal', 'desc');
 
 
@@ -95,7 +95,10 @@ class PesananController extends Controller
 
                 $btn .= '<button onclick="modalAction(\'' . url('/pesanan/' . $row->penjualan_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></button>';
 
-                $btn .= '<a target="_blank" href="/pesanan/' . $row->penjualan_id . '/print_struk" class="btn btn-primary btn-sm mx-1"><i class="fa fa-file"></i></a>';
+                if ($row->status != 'rejected') {
+                    $btn .= '<a target="_blank" href="/pesanan/' . $row->penjualan_id . '/print_struk" class="btn btn-primary btn-sm mx-1"><i class="fa fa-file"></i></a>';
+                }
+
                 return $btn;
             })
             ->rawColumns(['aksi', 'customer_wa'])

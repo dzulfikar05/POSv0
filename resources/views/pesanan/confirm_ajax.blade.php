@@ -44,10 +44,6 @@
                         </tr>
                         <tr>
                             <th class="text-right col-3">Pembeli :</th>
-                            <td class="col-9">{{ $penjualan->pembeli }}</td>
-                        </tr>
-                        <tr>
-                            <th class="text-right col-3">User :</th>
                             <td class="col-9">{{ $penjualan->user->nama ?? '-' }}</td>
                         </tr>
                     </table>
