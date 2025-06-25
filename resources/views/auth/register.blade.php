@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="{{ asset('adminlte/plugins/fontawesome-free/css/all.min.css') }}">
     <link rel="stylesheet" href="{{ asset('adminlte/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.min.css') }}">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
 
     <style>
         body {
@@ -26,15 +26,15 @@
             display: flex;
             width: 90%;
             max-width: 900px;
+            background-color: #fff;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
             border-radius: 12px;
             overflow: hidden;
-            background-color: #fff;
         }
 
         .register-image {
             flex: 1;
-            background: url('https://images.pexels.com/photos/12935074/pexels-photo-12935074.jpeg?cs=srgb&dl=pexels-imin-technology-276315592-12935074.jpg&fm=jpg') no-repeat center center;
+            background: url('https://images.pexels.com/photos/12935074/pexels-photo-12935074.jpeg') no-repeat center center;
             background-size: cover;
         }
 
@@ -45,18 +45,17 @@
 
         .register-form h1 {
             font-weight: 600;
-            margin-bottom: 20px;
             color: #007bff;
+            margin-bottom: 20px;
         }
 
-        .form-control {
-            border-radius: 8px;
+        .form-control,
+        .select2-selection {
             height: 45px;
+            border-radius: 8px;
         }
 
         .select2-container--default .select2-selection--single {
-            height: 45px;
-            border-radius: 8px;
             padding: 8px 12px;
             border: 1px solid #ced4da;
         }
@@ -98,6 +97,22 @@
                 padding: 25px;
             }
         }
+
+        /* Tambahkan ini di <style> */
+        .select2-container .select2-selection--single {
+            height: 45px !important;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            box-sizing: border-box;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: normal !important;
+            padding-left: 0;
+        }
     </style>
 </head>
 
@@ -123,7 +138,7 @@
                     <small id="error-password" class="error-text text-danger"></small>
                 </div>
                 <div class="mb-3">
-                    <select name="jk" id="jk" class="form-control">
+                    <select name="jk" id="jk" class="form-control" style="height: 37px !important">
                         <option value="">-- Pilih Jenis Kelamin --</option>
                         <option value="male">Laki-laki</option>
                         <option value="female">Perempuan</option>
@@ -131,7 +146,8 @@
                     <small id="error-jk" class="error-text text-danger"></small>
                 </div>
                 <div class="mb-3">
-                    <input type="text" name="wa" id="wa" class="form-control" placeholder="WhatsApp (ex: 628123456789)">
+                    <input type="text" name="wa" id="wa" class="form-control"
+                        placeholder="WhatsApp (ex: 628123456789)">
                     <small id="error-wa" class="error-text text-danger"></small>
                 </div>
                 <div class="mb-3">
@@ -155,64 +171,120 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             $('#jk').select2({
                 placeholder: "-- Pilih Jenis Kelamin --",
                 width: '100%',
+                height: '38px',
                 allowClear: true
             });
 
+            // Custom rule untuk validasi nomor WA Indonesia
+            $.validator.addMethod("waPattern", function(value, element) {
+                return this.optional(element) || /^(62)[1-9][0-9]{7,11}$/.test(value);
+            }, "Format tidak valid, harus dimulai dengan 62 dan hanya angka");
+
             $('#form-register').validate({
                 rules: {
-                    name: { required: true, minlength: 3, maxlength: 50 },
-                    username: { required: true, minlength: 4, maxlength: 20 },
-                    password: { required: true, minlength: 6, maxlength: 20 },
-                    jk: { required: true },
-                    wa: { required: true, pattern: /^(62)[1-9][0-9]{7,11}$/ },
-                    alamat: { required: true }
+                    name: {
+                        required: true,
+                        minlength: 3,
+                        maxlength: 50
+                    },
+                    username: {
+                        required: true,
+                        minlength: 4,
+                        maxlength: 20
+                    },
+                    password: {
+                        required: true,
+                        minlength: 6,
+                        maxlength: 20
+                    },
+                    jk: {
+                        required: true
+                    },
+                    wa: {
+                        required: true,
+                        waPattern: true
+                    },
+                    alamat: {
+                        required: true
+                    }
                 },
                 messages: {
-                    name: { required: "Nama lengkap wajib diisi", minlength: "Minimal 3 karakter", maxlength: "Maksimal 50 karakter" },
-                    username: { required: "Username wajib diisi", minlength: "Minimal 4 karakter", maxlength: "Maksimal 20 karakter" },
-                    password: { required: "Password wajib diisi", minlength: "Minimal 6 karakter", maxlength: "Maksimal 20 karakter" },
-                    wa: { required: "Nomor WhatsApp wajib diisi", pattern: "Harus dimulai dengan 62 dan hanya angka" },
-                    alamat: { required: "Alamat wajib diisi" }
+                    name: {
+                        required: "Nama lengkap wajib diisi",
+                        minlength: "Minimal 3 karakter",
+                        maxlength: "Maksimal 50 karakter"
+                    },
+                    username: {
+                        required: "Username wajib diisi",
+                        minlength: "Minimal 4 karakter",
+                        maxlength: "Maksimal 20 karakter"
+                    },
+                    password: {
+                        required: "Password wajib diisi",
+                        minlength: "Minimal 6 karakter",
+                        maxlength: "Maksimal 20 karakter"
+                    },
+                    jk: {
+                        required: "Jenis kelamin wajib dipilih"
+                    },
+                    wa: {
+                        required: "Nomor WhatsApp wajib diisi"
+                    },
+                    alamat: {
+                        required: "Alamat wajib diisi"
+                    }
                 },
-                submitHandler: function (form) {
+                submitHandler: function(form) {
                     $('.error-text').text('');
                     $.ajax({
                         url: form.action,
                         type: form.method,
                         data: $(form).serialize(),
                         dataType: 'json',
-                        success: function (response) {
+                        success: function(response) {
                             if (response.status) {
-                                Swal.fire({ icon: 'success', title: 'Berhasil', text: response.message }).then(() => {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil',
+                                    text: response.message
+                                }).then(() => {
                                     window.location = response.redirect;
                                 });
                             } else {
                                 if (response.msgField) {
-                                    $.each(response.msgField, function (field, msg) {
+                                    $.each(response.msgField, function(field, msg) {
                                         $('#error-' + field).text(msg[0]);
                                     });
                                 }
-                                Swal.fire({ icon: 'error', title: 'Gagal', text: response.message });
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal',
+                                    text: response.message
+                                });
                             }
                         },
-                        error: function () {
-                            Swal.fire({ icon: 'error', title: 'Kesalahan Server', text: 'Terjadi kesalahan saat proses registrasi.' });
+                        error: function() {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Kesalahan Server',
+                                text: 'Terjadi kesalahan saat proses registrasi.'
+                            });
                         }
                     });
                     return false;
                 },
-                errorPlacement: function (error, element) {
-                    const parent = element.closest('.form-group') || element.parent();
-                    parent.find('.error-text').text(error.text());
+                errorPlacement: function(error, element) {
+                    const target = element.closest('.form-group') || element.parent();
+                    target.find('.error-text').text(error.text());
                 },
-                highlight: function (element) {
+                highlight: function(element) {
                     $(element).addClass('is-invalid');
                 },
-                unhighlight: function (element) {
+                unhighlight: function(element) {
                     $(element).removeClass('is-invalid');
                 }
             });
