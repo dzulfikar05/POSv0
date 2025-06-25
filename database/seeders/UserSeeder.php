@@ -28,6 +28,7 @@ class UserSeeder extends Seeder
                 'username' => 'customer',
                 'nama' => 'Customer Random',
                 'password' => Hash::make('password'),
+                'wa' => '6281234567890',
             ],
         ];
 

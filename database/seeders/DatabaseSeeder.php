@@ -15,10 +15,14 @@ class DatabaseSeeder extends Seeder
         $this->call([
             LevelSeeder::class,
             UserSeeder::class,
-            // KategoriSeeder::class,
-            // BarangSeeder::class,
-            // StokSeeder::class,
-            // PenjualanSeeder::class,
+            SettingSeeder::class,
+
+            KategoriSeeder::class,
+            BarangSeeder::class,
+            SupplierSeeder::class,
+
+            StokSeeder::class,
+            PenjualanSeeder::class,
             // PenjualanDetailSeeder::class,
         ]);
     }
