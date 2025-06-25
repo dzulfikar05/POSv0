@@ -40,35 +40,27 @@ class DashboardController extends Controller
     public function getCardData(Request $request)
     {
         $penjualan = PenjualanModel::with('detail')
-            ->where(function ($query) {
-                $query->where('status', 'completed')
-                    ->orWhere('status', 'paid_off');
-            });
+            ->whereIn('status', ['completed', 'paid_off']);
 
-        if ($request->tahun) {
+        if (!empty($request->tahun)) {
             $penjualan->whereYear('penjualan_tanggal', $request->tahun);
         }
 
-        if ($request->bulan) {
+        if (!empty($request->bulan)) {
             $penjualan->whereMonth('penjualan_tanggal', $request->bulan);
         }
 
-        $getPenjualan = $penjualan->get()->sum(function ($penjualan) {
-            return $penjualan->detail->sum('harga');
-        });
-
-
+        $getPenjualan = $penjualan->get()->sum(fn($p) => $p->detail->sum('harga'));
 
         $pembelanjaan = StokModel::select('harga_total');
-        if ($request->tahun) {
+        if (!empty($request->tahun)) {
             $pembelanjaan->whereYear('stok_tanggal', $request->tahun);
         }
-        if ($request->bulan) {
+        if (!empty($request->bulan)) {
             $pembelanjaan->whereMonth('stok_tanggal', $request->bulan);
         }
+
         $getPembelanjaan = $pembelanjaan->sum('harga_total');
-
-
         $getMargin = $getPenjualan - $getPembelanjaan;
 
         return response()->json([
@@ -80,51 +72,39 @@ class DashboardController extends Controller
 
     public function getChartData(Request $request)
     {
-        $tahun = $request->tahun ?? date('Y');
-        $bulan = $request->bulan ?? date('m');
+        $penjualan = PenjualanModel::with('detail')->whereIn('status', ['completed', 'paid_off']);
 
-        // Penjualan per bulan
-        $penjualanBulanan = PenjualanModel::with('detail')
-            ->where(function ($q) {
-                $q->where('status', 'completed')
-                    ->orWhere('status', 'paid_off');
-            })
-            ->whereYear('penjualan_tanggal', $tahun)
-            ->get()
-            ->groupBy(function ($item) {
-                return (int) date('m', strtotime($item->penjualan_tanggal));
-            })
-            ->map(function ($group) {
-                return $group->sum(function ($p) {
-                    return $p->detail->sum('harga');
-                });
-            });
+        if (!empty($request->tahun)) {
+            $penjualan->whereYear('penjualan_tanggal', $request->tahun);
+        }
+
+        $data = $penjualan->get();
+
+        $perBulan = $data->groupBy(fn($d) => (int) date('m', strtotime($d->penjualan_tanggal)))
+            ->map(fn($group) => $group->sum(fn($p) => $p->detail->sum('harga')));
 
         $dataBulanan = [];
         for ($i = 1; $i <= 12; $i++) {
-            $dataBulanan[] = $penjualanBulanan[$i] ?? 0;
+            $dataBulanan[] = $perBulan[$i] ?? 0;
         }
 
-        // Item terlaris top 10 berdasarkan nama barang
-        $itemTerlaris = PenjualanDetailModel::with(['barang', 'penjualan'])
-            ->get()
-            ->filter(function ($item) use ($tahun, $bulan) {
-                $tanggal = $item->penjualan->penjualan_tanggal ?? null;
-                return $tanggal &&
-                    date('Y', strtotime($tanggal)) == $tahun &&
-                    date('m', strtotime($tanggal)) == $bulan;
-            })
-            ->groupBy('barang_id')
-            ->map(function ($group) {
-                return [
-                    'barang_nama' => $group->first()->barang->barang_nama ?? '-',
-                    'total' => $group->sum('jumlah')
-                ];
-            })
-            ->sortByDesc('total')
-            ->take(10)
-            ->values(); // reset key
+        $terlaris = PenjualanDetailModel::with(['barang', 'penjualan'])
+            ->whereHas('penjualan', function ($q) use ($request) {
+                $q->whereIn('status', ['completed', 'paid_off']);
+                if (!empty($request->tahun)) {
+                    $q->whereYear('penjualan_tanggal', $request->tahun);
+                }
+                if (!empty($request->bulan)) {
+                    $q->whereMonth('penjualan_tanggal', $request->bulan);
+                }
+            })->get();
 
+        $itemTerlaris = $terlaris->groupBy('barang_id')
+            ->map(fn($group) => [
+                'barang_nama' => $group->first()->barang->barang_nama ?? '-',
+                'total' => $group->sum('jumlah')
+            ])
+            ->sortByDesc('total')->take(10)->values();
 
         return response()->json([
             'bulan' => [
@@ -140,14 +120,14 @@ class DashboardController extends Controller
                     'September',
                     'Oktober',
                     'November',
-                    'Desember',
+                    'Desember'
                 ],
-                'data' => $dataBulanan,
+                'data' => $dataBulanan
             ],
             'item' => [
-                'labels' => $itemTerlaris->pluck('barang_nama'), // Ambil nama barang
-                'data' => $itemTerlaris->pluck('total'),
-            ],
+                'labels' => $itemTerlaris->pluck('barang_nama'),
+                'data' => $itemTerlaris->pluck('total')
+            ]
         ]);
     }
 }

@@ -32,41 +32,41 @@ class StokController extends Controller
         return view('stok.index', compact('breadcrumb', 'page', 'activeMenu'));
     }
 
-   public function list(Request $request)
-{
-    $stok = StokModel::select(
+    public function list(Request $request)
+    {
+        $stok = StokModel::select(
             't_stok.*',
             'm_user.nama as user_nama',
             'm_supplier.supplier_nama'
         )
-        ->leftJoin('m_user', 'm_user.user_id', '=', 't_stok.user_id')
-        ->leftJoin('m_supplier', 'm_supplier.supplier_id', '=', 't_stok.supplier_id');
+            ->leftJoin('m_user', 'm_user.user_id', '=', 't_stok.user_id')
+            ->leftJoin('m_supplier', 'm_supplier.supplier_id', '=', 't_stok.supplier_id');
 
-    if ($request->tahun) {
-        $stok->whereYear('stok_tanggal', $request->tahun);
-    }
+        if ($request->tahun) {
+            $stok->whereYear('stok_tanggal', $request->tahun);
+        }
 
-    if ($request->bulan) {
-        $stok->whereMonth('stok_tanggal', $request->bulan);
-    }
+        if ($request->bulan) {
+            $stok->whereMonth('stok_tanggal', $request->bulan);
+        }
 
-    return DataTables::of($stok)
-        ->addIndexColumn()
-        ->editColumn('user_nama', function ($stok) {
-            return $stok->user_nama ?? '-';
-        })
-        ->editColumn('supplier_nama', function ($stok) {
-            return $stok->supplier_nama ?? '-';
-        })
-        ->addColumn('aksi', function ($stok) {
-            return '
+        return DataTables::of($stok)
+            ->addIndexColumn()
+            ->editColumn('user_nama', function ($stok) {
+                return $stok->user_nama ?? '-';
+            })
+            ->editColumn('supplier_nama', function ($stok) {
+                return $stok->supplier_nama ?? '-';
+            })
+            ->addColumn('aksi', function ($stok) {
+                return '
                 <button onclick="modalAction(\'' . url('/stok/' . $stok->stok_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i></button>
                 <button onclick="modalAction(\'' . url('/stok/' . $stok->stok_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></button>
             ';
-        })
-        ->rawColumns(['aksi'])
-        ->make(true);
-}
+            })
+            ->rawColumns(['aksi'])
+            ->make(true);
+    }
 
     public function create_ajax()
     {
@@ -416,6 +416,7 @@ class StokController extends Controller
     {
         $tahun = $request->tahun ?? date('Y');
 
+        // Inisialisasi nama bulan
         $bulanIndonesia = [
             1 => 'Januari',
             2 => 'Februari',
@@ -431,25 +432,20 @@ class StokController extends Controller
             12 => 'Desember',
         ];
 
-        $stokPerBulan = StokModel::selectRaw('
-            MONTH(stok_tanggal) as bulan,
-            SUM(stok_jumlah) as total_jumlah,
-            SUM(stok_jumlah * harga_total) as total_harga
-        ')
+        // Ambil data stok masuk berdasarkan tahun yang dipilih
+        $stokPerBulan = DB::table('t_stok')
+            ->selectRaw('MONTH(stok_tanggal) as bulan, SUM(harga_total) as total_harga')
             ->whereYear('stok_tanggal', $tahun)
             ->groupByRaw('MONTH(stok_tanggal)')
-            ->get()
-            ->keyBy('bulan');
+            ->pluck('total_harga', 'bulan'); // key: bulan, value: total_harga
 
+        // Format data agar semua bulan tetap ada meskipun tidak ada transaksi
         $data = [];
         foreach ($bulanIndonesia as $bulan => $namaBulan) {
-            $item = $stokPerBulan->get($bulan);
-
             $data[] = [
                 'bulan' => $bulan,
                 'bulan_nama' => $namaBulan,
-                'total_jumlah' => $item->total_jumlah ?? 0,
-                'total_harga' => $item->total_harga ?? 0,
+                'total_harga' => round($stokPerBulan[$bulan] ?? 0, 2),
             ];
         }
 

@@ -11,11 +11,13 @@
                     <div class="row mb-3">
                         <div class="col-5 col-md-12 mb-2">
                             <select id="filter_tahun" class="form-control filter_year">
-                                <option value="">Semua Tahun</option>
+                                <option value="" {{ request('tahun') == '' ? 'selected' : '' }}>Semua Tahun</option>
                                 @for ($year = date('Y'); $year >= 2020; $year--)
-                                    <option value="{{ $year }}" {{ $year == date('Y') ? 'selected' : '' }}>
-                                        {{ $year }}</option>
+                                    <option value="{{ $year }}" {{ request('tahun') == $year ? 'selected' : '' }}>
+                                        {{ $year }}
+                                    </option>
                                 @endfor
+
                             </select>
                         </div>
                         <div class="col-7 col-md-12">
