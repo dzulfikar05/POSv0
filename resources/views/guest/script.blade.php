@@ -6,7 +6,7 @@
     $(() => {
         getBannerData();
         getProductData(currentPage);
-        if(cart.length > 0) {
+        if (cart.length > 0) {
             $('.cart-count').text(cart.length);
         }
     });
@@ -73,6 +73,19 @@
             },
             success: function(data) {
                 let html = '';
+
+                if (data.data.length === 0) {
+                    html = `
+            <div class="col-12 text-center my-5">
+                <img src="https://www.avisa.care//assets/img/No_Product_Found.png" alt="Tidak ada produk" style="max-width: 200px; opacity: 0.6;">
+                <h5 class="mt-3 text-muted">Tidak ada produk ditemukan</h5>
+            </div>
+        `;
+                    $('.product-list').html(html);
+                    $('#pagination').html('');
+                    return;
+                }
+
                 // Render products
                 for (let i = 0; i < data.data.length; i++) {
                     if (data.data[i].image == null) {
@@ -196,7 +209,7 @@
 
     addCart = (id_barang) => {
         let auth = '{{ $auth }}';
-        if(!auth){
+        if (!auth) {
             window.location.href = "{{ url('/login') }}";
             return;
         }

@@ -123,38 +123,38 @@
                 },
                 columns: [{
                         data: "DT_RowIndex",
-                        className: "text-center",
                         orderable: false,
-                        searchable: false
+                        searchable: false,
+                        className: "text-center"
                     },
                     {
-                        data: "penjualan_kode"
+                        data: "penjualan_kode",
+                        name: "penjualan_kode"
                     },
                     {
-                        data: "penjualan_tanggal"
+                        data: "penjualan_tanggal",
+                        name: "penjualan_tanggal"
                     },
                     {
-                        data: "customer_nama"
+                        data: "customer_nama",
+                        name: "customer_nama"
                     },
                     {
-                        data: "customer_wa"
+                        data: "customer_wa",
+                        name: "customer_wa"
                     },
                     {
                         data: "total_harga",
+                        name: "total_harga",
                         className: "text-right"
                     },
                     {
-                        data: "user_nama"
+                        data: "user_nama",
+                        name: "user_nama"
                     },
                     {
                         data: "status",
-                        render: function(data) {
-                            if (data === 'paid_off')
-                                return '<span class="badge badge-primary" style="font-size:12px">Lunas - Disiapkan</span>';
-                            if (data === 'completed')
-                                return '<span class="badge badge-success" style="font-size:12px">Selesai</span>';
-                            return data;
-                        }
+                        name: "status"
                     },
                     {
                         data: "aksi",
@@ -162,6 +162,7 @@
                         searchable: false
                     }
                 ]
+
             });
 
             $('#filter_tahun, #filter_bulan').on('change', function() {

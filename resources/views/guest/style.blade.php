@@ -652,5 +652,24 @@
     }
 }
 
+/* Atur tinggi kotak Select2 agar sama seperti form-control Bootstrap */
+.select2-container .select2-selection--single {
+    height: 38px !important;
+    padding: 6px 12px;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 0.25rem;
+}
+
+/* Atur tinggi teks di dalamnya */
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 26px !important;
+    padding-left: 0 !important;
+}
+
+/* Atur tinggi ikon dropdown */
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 38px !important;
+}
 
 </style>

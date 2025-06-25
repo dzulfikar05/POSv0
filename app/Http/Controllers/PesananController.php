@@ -32,19 +32,21 @@ class PesananController extends Controller
 
     public function list(Request $request)
     {
-        $penjualan = PenjualanModel::with('user', 'customer')
+        $penjualan = DB::table('t_penjualan')
+            ->join('m_user', 'm_user.user_id', '=', 't_penjualan.user_id')
+            ->join('m_user as customers', 'customers.user_id', '=', 't_penjualan.customer_id')
             ->select([
-                'penjualan_id',
-                'user_id',
-                'customer_id',
-                'penjualan_kode',
-                'penjualan_tanggal',
-                'status',
-                DB::raw('(SELECT SUM(harga * jumlah) FROM t_penjualan_detail WHERE t_penjualan_detail.penjualan_id = t_penjualan.penjualan_id) as total_harga')
+                't_penjualan.penjualan_id',
+                't_penjualan.penjualan_kode',
+                't_penjualan.penjualan_tanggal',
+                't_penjualan.status',
+                'm_user.nama as user_nama',
+                'customers.nama as customer_nama',
+                'customers.wa as customer_wa',
+                DB::raw('(SELECT SUM(harga * jumlah) FROM t_penjualan_detail WHERE t_penjualan_detail.penjualan_id = t_penjualan.penjualan_id) as total_harga'),
             ])
-            ->whereIn('status', ['validate_payment', 'rejected'])
-            ->orderBy('penjualan_tanggal', 'desc');
-
+            ->whereIn('t_penjualan.status', ['validate_payment', 'rejected'])
+            ->orderBy('t_penjualan.penjualan_tanggal', 'desc');
 
         if ($request->tahun) {
             $penjualan->whereYear('penjualan_tanggal', $request->tahun);
@@ -54,52 +56,39 @@ class PesananController extends Controller
             $penjualan->whereMonth('penjualan_tanggal', $request->bulan);
         }
 
-        return DataTables::of($penjualan->get())
+        return DataTables::of($penjualan)
             ->addIndexColumn()
-            ->addColumn('user_nama', function ($stok) {
-                return $stok->user->nama ?? '-';
-            })
-            ->addColumn('customer_nama', function ($stok) {
-                return $stok->customer->nama;
-            })
-            ->addColumn('status_penjualan', function ($row) {
+            ->editColumn('penjualan_tanggal', fn($row) => \Carbon\Carbon::parse($row->penjualan_tanggal)->locale('id')->translatedFormat('d F Y - H:i'))
+            ->editColumn('total_harga', fn($row) => number_format($row->total_harga ?? 0, 0, ',', '.'))
+            ->editColumn('status', function ($row) {
+                if ($row->status === 'validate_payment') {
+                    return '<span class="badge badge-warning">Validasi Pembayaran</span>';
+                } elseif ($row->status === 'rejected') {
+                    return '<span class="badge badge-danger">Dibatalkan</span>';
+                }
                 return $row->status;
             })
-            ->addColumn('customer_wa', function ($stok) {
-                return '<a href="https://wa.me/' . $stok->customer->wa . '" target="_blank" class="btn btn-success">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-whatsapp" viewBox="0 0 16 16">
-                    <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/>
-                </svg>
-            ' . $stok->customer->wa . '</a>';
-            })
-            ->addColumn('penjualan_tanggal', function ($row) {
-                return \Carbon\Carbon::parse($row->tanggal)
-                    ->locale('id')
-                    ->translatedFormat('d F Y - H:i');
-            })
-            ->addColumn('total_harga', function ($row) {
-                return number_format($row->total_harga ?? 0, 0, ',', '.');
+            ->addColumn('customer_wa', function ($row) {
+                return '<a href="https://wa.me/' . $row->customer_wa . '" target="_blank" class="btn btn-success btn-sm">
+                    <i class="fab fa-whatsapp"></i> ' . $row->customer_wa . '
+                </a>';
             })
             ->addColumn('aksi', function ($row) {
-                $btn = "";
+                $btn = '';
 
-                if ($row->status != 'rejected') {
-
-                    // $btn .= '<button onclick="onValidatePayment(' . $row->penjualan_id . ')" class="btn btn-success btn-sm"><i class="fa fa-check"></i></button> ';
-                    // $btn .= '<button onclick="onReject(' . $row->penjualan_id . ')" class="btn btn-danger btn-sm mr-3"><i class="fa fa-times"></i></button> ';
-
+                if ($row->status !== 'rejected') {
                     $btn .= '<button onclick="modalAction(\'' . url('/pesanan/' . $row->penjualan_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm"><i class="fa fa-eye"></i></button> ';
                 }
 
                 $btn .= '<button onclick="modalAction(\'' . url('/pesanan/' . $row->penjualan_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></button>';
 
-                if ($row->status != 'rejected') {
+                if ($row->status !== 'rejected') {
                     $btn .= '<a target="_blank" href="/pesanan/' . $row->penjualan_id . '/print_struk" class="btn btn-primary btn-sm mx-1"><i class="fa fa-file"></i></a>';
                 }
 
                 return $btn;
             })
-            ->rawColumns(['aksi', 'customer_wa'])
+            ->rawColumns(['status', 'aksi', 'customer_wa'])
             ->make(true);
     }
 

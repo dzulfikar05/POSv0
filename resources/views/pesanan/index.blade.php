@@ -120,36 +120,35 @@
                         searchable: false
                     },
                     {
-                        data: "penjualan_kode"
+                        data: "penjualan_kode",
+                        name: "t_penjualan.penjualan_kode"
                     },
                     {
-                        data: "penjualan_tanggal"
+                        data: "penjualan_tanggal",
+                        name: "t_penjualan.penjualan_tanggal"
                     },
                     {
-                        data: "customer_nama"
+                        data: "customer_nama",
+                        name: "customers.nama"
                     },
                     {
-                        data: "customer_wa"
+                        data: "customer_wa",
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: "total_harga",
+                        orderable: false,
+                        searchable: false,
                         className: "text-right"
                     },
                     {
-                        data: "user_nama"
+                        data: "user_nama",
+                        name: "m_user.nama"
                     },
                     {
-                        data: "status_penjualan",
-                        render: function(data) {
-                            switch (data) {
-                                case 'validate_payment':
-                                    return `<span class="badge badge-warning">Validasi Pembayaran</span>`;
-                                case 'rejected':
-                                    return `<span class="badge badge-danger">Dibatalkan</span>`;
-                                default:
-                                    return data;
-                            }
-                        }
+                        data: "status",
+                        name: "t_penjualan.status"
                     },
                     {
                         data: "aksi",

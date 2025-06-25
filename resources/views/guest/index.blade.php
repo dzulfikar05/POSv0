@@ -22,6 +22,8 @@
     <link rel="stylesheet" href="{{ asset('adminlte/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     @include('guest.style')
     <style>
@@ -185,7 +187,7 @@
 
                     <div class="row">
                         <div class="col-md-4 offset-md-4 mb-4">
-                            <select id="categoryFilter" class="form-control" onchange="getProductData()">
+                            <select id="categoryFilter" class="form-control" onchange="getProductData()" style="height: 38px !important">
                                 <option value="">Semua Kategori</option>
                                 @foreach ($kategori as $cat)
                                     <option value="{{ $cat->kategori_id }}">{{ $cat->kategori_nama }}</option>
@@ -328,6 +330,20 @@
             margin-top: 14px;
         }
     </style>
+
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#categoryFilter').select2({
+                placeholder: "Pilih kategori",
+                allowClear: true,
+                width: '100%'
+            });
+        });
+    </script>
+
 </body>
 
 </html>

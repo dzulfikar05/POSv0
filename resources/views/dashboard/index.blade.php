@@ -2,15 +2,14 @@
 
 @section('content')
     <div class="col-12 row">
-
-        <div class="p-3 col-md-3">
+        <div class="p-3 col-lg-3 col-md-4 col-sm-6">
             <div class="card dashboard-card">
                 <div class="card-header">
                     <span class="card-title text-left">Filter Data</span>
                 </div>
                 <div class="card-body">
                     <div class="row mb-3">
-                        <div class="col-md-4">
+                        <div class="col-5 col-md-12 mb-2">
                             <select id="filter_tahun" class="form-control filter_year">
                                 <option value="">Semua Tahun</option>
                                 @for ($year = date('Y'); $year >= 2020; $year--)
@@ -19,7 +18,7 @@
                                 @endfor
                             </select>
                         </div>
-                        <div class="col-md-8">
+                        <div class="col-7 col-md-12">
                             <select id="filter_bulan" class="form-control filter_month">
                                 <option value="">Semua Bulan</option>
                                 @php
@@ -47,52 +46,31 @@
                                 @endforeach
                             </select>
                         </div>
-
                     </div>
                 </div>
             </div>
         </div>
-        <div class="p-3 col-md-3">
-            <div class="card ">
-                <div class="card-header">
-                    <span class="card-title text-left">Total Penjualan</span>
-                </div>
-                <div class="card-body">
-                    <span id="penjualan" class="font-weight-bold h1 text-muted">
 
-                    </span>
+        @foreach ([['id' => 'penjualan', 'title' => 'Total Penjualan'], ['id' => 'pembelanjaan', 'title' => 'Total Pembelanjaan'], ['id' => 'margin', 'title' => 'Margin']] as $card)
+            <div class="p-3 col-lg-3 col-md-4 col-sm-6">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title text-left">{{ $card['title'] }}</span>
+                    </div>
+                    <div class="card-body">
+                        <span id="{{ $card['id'] }}"
+                            class="font-weight-bold h1 " style="{{ $card['id'] === 'pembelanjaan' ? 'color: grey !important' : '' }}">
+                        </span>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="p-3 col-md-3">
-            <div class="card ">
-                <div class="card-header">
-                    <span class="card-title text-left">Total Pembelanjaan</span>
-                </div>
-                <div class="card-body">
-                    <span id="pembelanjaan" class="font-weight-bold h1 text-muted" style="color: #8b8b8b !important">
-
-                    </span>
-                </div>
-            </div>
-        </div>
-        <div class="p-3 col-md-3">
-            <div class="card ">
-                <div class="card-header">
-                    <span class="card-title text-left">Margin</span>
-                </div>
-                <div class="card-body">
-                    <span id="margin" class="font-weight-bold h1 text-muted">
-
-                    </span>
-                </div>
-            </div>
-        </div>
+        @endforeach
 
 
     </div>
+
     <div class="col-12 row px-3 mt-4">
-        <div class="col-md-8">
+        <div class="col-lg-8 col-md-7">
             <div class="card">
                 <div class="card-header">
                     <span class="card-title">Grafik Penjualan per Bulan</span>
@@ -102,7 +80,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-lg-4 col-md-5">
             <div class="card">
                 <div class="card-header">
                     <span class="card-title">Item Terlaris</span>
@@ -265,7 +243,7 @@
                                 tooltip: {
                                     callbacks: {
                                         label: function(tooltipItem) {
-                                            return  "Terjual : " +
+                                            return "Terjual : " +
                                                 tooltipItem.raw;
                                         }
                                     }

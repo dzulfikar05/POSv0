@@ -55,11 +55,6 @@
             border-radius: 8px;
         }
 
-        .select2-container--default .select2-selection--single {
-            padding: 8px 12px;
-            border: 1px solid #ced4da;
-        }
-
         .btn-primary {
             border-radius: 8px;
             font-weight: 600;
@@ -98,7 +93,6 @@
             }
         }
 
-        /* Tambahkan ini di <style> */
         .select2-container .select2-selection--single {
             height: 45px !important;
             padding: 8px 12px;
@@ -125,32 +119,32 @@
 
             <form action="{{ url('register') }}" method="POST" id="form-register">
                 @csrf
-                <div class="mb-3">
+                <div class="form-group mb-3">
                     <input type="text" name="name" id="name" class="form-control" placeholder="Full name">
                     <small id="error-name" class="error-text text-danger"></small>
                 </div>
-                <div class="mb-3">
+                <div class="form-group mb-3">
                     <input type="text" name="username" id="username" class="form-control" placeholder="Username">
                     <small id="error-username" class="error-text text-danger"></small>
                 </div>
-                <div class="mb-3">
+                <div class="form-group mb-3">
                     <input type="password" name="password" id="password" class="form-control" placeholder="Password">
                     <small id="error-password" class="error-text text-danger"></small>
                 </div>
-                <div class="mb-3">
-                    <select name="jk" id="jk" class="form-control" style="height: 37px !important">
+                <div class="form-group mb-3">
+                    <select name="jk" id="jk" class="form-control">
                         <option value="">-- Pilih Jenis Kelamin --</option>
                         <option value="male">Laki-laki</option>
                         <option value="female">Perempuan</option>
                     </select>
                     <small id="error-jk" class="error-text text-danger"></small>
                 </div>
-                <div class="mb-3">
+                <div class="form-group mb-3">
                     <input type="text" name="wa" id="wa" class="form-control"
                         placeholder="WhatsApp (ex: 628123456789)">
                     <small id="error-wa" class="error-text text-danger"></small>
                 </div>
-                <div class="mb-3">
+                <div class="form-group mb-3">
                     <textarea name="alamat" id="alamat" class="form-control" rows="3" placeholder="Alamat"></textarea>
                     <small id="error-alamat" class="error-text text-danger"></small>
                 </div>
@@ -175,14 +169,12 @@
             $('#jk').select2({
                 placeholder: "-- Pilih Jenis Kelamin --",
                 width: '100%',
-                height: '38px',
                 allowClear: true
             });
 
-            // Custom rule untuk validasi nomor WA Indonesia
             $.validator.addMethod("waPattern", function(value, element) {
                 return this.optional(element) || /^(62)[1-9][0-9]{7,11}$/.test(value);
-            }, "Format tidak valid, harus dimulai dengan 62 dan hanya angka");
+            }, "Format nomor WA tidak valid. Gunakan format 628xxxxxxxxx");
 
             $('#form-register').validate({
                 rules: {
@@ -238,6 +230,16 @@
                         required: "Alamat wajib diisi"
                     }
                 },
+                errorPlacement: function(error, element) {
+                    const name = element.attr('name');
+                    $('#error-' + name).text(error.text());
+                },
+                highlight: function(element) {
+                    $(element).addClass('is-invalid');
+                },
+                unhighlight: function(element) {
+                    $(element).removeClass('is-invalid');
+                },
                 submitHandler: function(form) {
                     $('.error-text').text('');
                     $.ajax({
@@ -248,12 +250,11 @@
                         success: function(response) {
                             if (response.status) {
                                 Swal.fire({
-                                    icon: 'success',
-                                    title: 'Berhasil',
-                                    text: response.message
-                                }).then(() => {
-                                    window.location = response.redirect;
-                                });
+                                        icon: 'success',
+                                        title: 'Berhasil',
+                                        text: response.message
+                                    })
+                                    .then(() => window.location = response.redirect);
                             } else {
                                 if (response.msgField) {
                                     $.each(response.msgField, function(field, msg) {
@@ -276,16 +277,6 @@
                         }
                     });
                     return false;
-                },
-                errorPlacement: function(error, element) {
-                    const target = element.closest('.form-group') || element.parent();
-                    target.find('.error-text').text(error.text());
-                },
-                highlight: function(element) {
-                    $(element).addClass('is-invalid');
-                },
-                unhighlight: function(element) {
-                    $(element).removeClass('is-invalid');
                 }
             });
         });

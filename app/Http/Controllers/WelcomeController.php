@@ -102,7 +102,7 @@ class WelcomeController extends Controller
 
             DB::commit();
 
-            return response()->json(['status' => true, 'message' => 'Data berhasil ditambahkan']);
+            return response()->json(['status' => true, 'message' => 'Berhasil menambahkan ke keranjang']);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['status' => false, 'message' => $e->getMessage()]);
