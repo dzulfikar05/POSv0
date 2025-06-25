@@ -80,7 +80,7 @@ class PenjualanController extends Controller
                 $btn = "";
 
                 if ($row->status != 'completed') {
-                    $btn .= '<button onclick="onComplete(' . $row->penjualan_id . ')" class="btn btn-success btn-sm mr-3" ><i class="fa fa-check"></i></button> ';
+                    // $btn .= '<button onclick="onComplete(' . $row->penjualan_id . ')" class="btn btn-success btn-sm mr-3" ><i class="fa fa-check"></i></button> ';
                 }
 
                 $btn .= '<button onclick="modalAction(\'' . url('/penjualan/' . $row->penjualan_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm"><i class="fa fa-eye"></i></button> ';
@@ -191,20 +191,12 @@ class PenjualanController extends Controller
                 'customer_id' => $request->customer_id,
             ]);
 
-            foreach ($request->barang_id as $i => $barangId) {
-                $barang = BarangModel::find($barangId);
-                $barang->update([
-                    'stok' => $barang->stok + $request->jumlah[$i]
-                ]);
-            }
+
 
             PenjualanDetailModel::where('penjualan_id', $id)->delete();
 
             foreach ($request->barang_id as $i => $barangId) {
-                $barang = BarangModel::find($barangId);
-                $barang->update([
-                    'stok' => $barang->stok - $request->jumlah[$i]
-                ]);
+
 
                 PenjualanDetailModel::create([
                     'penjualan_id' => $id,
@@ -233,12 +225,7 @@ class PenjualanController extends Controller
         if ($request->ajax()) {
             $penjualan = PenjualanModel::with('detail')->find($id);
             if ($penjualan) {
-                foreach ($penjualan->detail ?? [] as $detail) {
-                    $barang = BarangModel::find($detail->barang_id);
-                    $barang->update([
-                        'stok' => $barang->stok + $detail->jumlah
-                    ]);
-                }
+
                 PenjualanDetailModel::where('penjualan_id', $id)->delete();
                 $penjualan->delete();
 

@@ -13,11 +13,12 @@
                             <i class="fa fa-download mr-1"></i> Export
                         </button>
                         <div class="dropdown-menu" aria-labelledby="importExportDropdownPenjualan">
-                            <a class="dropdown-item d-flex align-items-center" href="{{ url('/penjualan/export_excel') }}" id="exportExcelUrl">
+                            <a class="dropdown-item d-flex align-items-center" href="{{ url('/penjualan/export_excel') }}"
+                                id="exportExcelUrl">
                                 <i class="fa fa-file-excel text-success mr-2"></i> Export to Excel
                             </a>
-                            <a class="dropdown-item d-flex align-items-center" href="{{ url('/penjualan/export_pdf') }}" id="exportPdfUrl"
-                                target="_blank">
+                            <a class="dropdown-item d-flex align-items-center" href="{{ url('/penjualan/export_pdf') }}"
+                                id="exportPdfUrl" target="_blank">
                                 <i class="fa fa-file-pdf text-danger mr-2"></i> Export to PDF
                             </a>
                         </div>
@@ -150,30 +151,41 @@
 
         function onComplete(id) {
             const html = `
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header bg-warning">
-                        <h5 class="modal-title">Konfirmasi Pesanan Selesai</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Apakah Anda yakin pesanan telah selesai?</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                        <button type="button" onclick="onUpdateCompleted('${id}')" data-dismiss="modal" class="btn btn-primary">Ya, Validasi</button>
-                    </div>
-                </div>
-            </div>`;
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">Konfirmasi Pesanan Selesai</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin pesanan telah selesai?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="btn-confirm-completed">Ya, Validasi</button>
+            </div>
+        </div>
+    </div>`;
 
             $('#confirmModal').html(html).modal('show');
+
+            // Bersihkan listener lama dan tambahkan yang baru
+            $(document).off('click', '#btn-confirm-completed').on('click', '#btn-confirm-completed', function() {
+                $('#confirmModal').modal('hide');
+
+                // Tunggu modal benar-benar tertutup sebelum kirim AJAX
+                $('#confirmModal').one('hidden.bs.modal', function() {
+                    $('#confirmModal').html('');
+                    onUpdateCompleted(id);
+                });
+            });
         }
 
         function onUpdateCompleted(id) {
             $.ajax({
-                url: `{{ url('/penjualan/${id}/update_status') }}`,
+                url: `/penjualan/${id}/update_status`,
                 type: 'POST',
                 data: {
                     id: id,
@@ -181,9 +193,6 @@
                 },
                 success: function(response) {
                     if (response.status) {
-                        $('#confirmModal').html('');
-                        $('#confirmModal').modal('hide');
-
                         Swal.fire({
                             icon: 'success',
                             title: 'Berhasil',
@@ -191,17 +200,23 @@
                         });
                         tablePenjualan.ajax.reload();
                     } else {
-                        $('#confirmModal').html('');
-                        $('#confirmModal').modal('hide');
                         Swal.fire({
                             icon: 'error',
                             title: 'Terjadi Kesalahan',
                             text: response.message
                         });
                     }
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Gagal menghubungi server.'
+                    });
                 }
-            })
+            });
         }
+
 
         var tablePenjualan;
         $(document).ready(function() {

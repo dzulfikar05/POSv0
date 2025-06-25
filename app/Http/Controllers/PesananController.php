@@ -85,8 +85,8 @@ class PesananController extends Controller
 
                 if ($row->status != 'rejected') {
 
-                    $btn .= '<button onclick="onValidatePayment(' . $row->penjualan_id . ')" class="btn btn-success btn-sm"><i class="fa fa-check"></i></button> ';
-                    $btn .= '<button onclick="onReject(' . $row->penjualan_id . ')" class="btn btn-danger btn-sm mr-3"><i class="fa fa-times"></i></button> ';
+                    // $btn .= '<button onclick="onValidatePayment(' . $row->penjualan_id . ')" class="btn btn-success btn-sm"><i class="fa fa-check"></i></button> ';
+                    // $btn .= '<button onclick="onReject(' . $row->penjualan_id . ')" class="btn btn-danger btn-sm mr-3"><i class="fa fa-times"></i></button> ';
 
                     $btn .= '<button onclick="modalAction(\'' . url('/pesanan/' . $row->penjualan_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm"><i class="fa fa-eye"></i></button> ';
                 }
@@ -176,62 +176,63 @@ class PesananController extends Controller
         $customers = CustomerModel::all();
         return view('pesanan.edit_ajax', compact('penjualan', 'barangs', 'customers'));
     }
-
     public function update_ajax(Request $request, $id)
     {
-        $rules = [
-            'customer_id' => 'required|exists:m_user,user_id',
-            'penjualan_kode' => "required|string|unique:t_penjualan,penjualan_kode,$id,penjualan_id",
-            'barang_id.*' => 'required|exists:m_barang,barang_id',
-            'harga.*' => 'required|numeric|min:0',
-            'jumlah.*' => 'required|integer|min:1'
-        ];
+        if ($request->ajax() || $request->wantsJson()) {
+            $rules = [
+                'customer_id'   => 'required|exists:m_user,user_id',
+                'penjualan_kode' => "required|string|unique:t_penjualan,penjualan_kode,{$id},penjualan_id",
+                'barang_id.*'   => 'required|exists:m_barang,barang_id',
+                'harga.*'       => 'required|numeric|min:0',
+                'jumlah.*'      => 'required|integer|min:1'
+            ];
 
-        $validator = Validator::make($request->all(), $rules);
+            $validator = Validator::make($request->all(), $rules);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'msgField' => $validator->errors()
-            ]);
-        }
-
-        DB::beginTransaction();
-        try {
-            $penjualan = PenjualanModel::findOrFail($id);
-            $penjualan->update([
-                'customer_id' => $request->customer_id,
-            ]);
-
-            foreach ($request->barang_id as $i => $barangId) {
-                $barang = BarangModel::find($barangId);
-                $barang->update([
-                    'stok' => $barang->stok + $request->jumlah[$i]
+            if ($validator->fails()) {
+                return response()->json([
+                    'status'    => false,
+                    'msgField'  => $validator->errors(),
+                    'message'   => 'Validasi gagal'
                 ]);
             }
 
-            PenjualanDetailModel::where('penjualan_id', $id)->delete();
-
-            foreach ($request->barang_id as $i => $barangId) {
-                $barang = BarangModel::find($barangId);
-                $barang->update([
-                    'stok' => $barang->stok - $request->jumlah[$i]
+            DB::beginTransaction();
+            try {
+                $penjualan = PenjualanModel::findOrFail($id);
+                $penjualan->update([
+                    'customer_id' => $request->customer_id,
                 ]);
 
-                PenjualanDetailModel::create([
-                    'penjualan_id' => $id,
-                    'barang_id' => $barangId,
-                    'harga' => $request->harga[$i],
-                    'jumlah' => $request->jumlah[$i]
+                // hapus detail lama
+                PenjualanDetailModel::where('penjualan_id', $id)->delete();
+
+                // insert ulang detail
+                foreach ($request->barang_id as $i => $barangId) {
+                    PenjualanDetailModel::create([
+                        'penjualan_id' => $id,
+                        'barang_id'    => $barangId,
+                        'harga'        => $request->harga[$i],
+                        'jumlah'       => $request->jumlah[$i]
+                    ]);
+                }
+
+                DB::commit();
+                return response()->json([
+                    'status'  => true,
+                    'message' => 'Data penjualan berhasil diperbarui'
+                ]);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Gagal memperbarui data',
+                    'error'   => $e->getMessage()
                 ]);
             }
-
-            DB::commit();
-            return response()->json(['status' => true, 'message' => 'Data penjualan berhasil diperbarui']);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['status' => false, 'message' => 'Gagal memperbarui data']);
         }
+
+        return redirect('/penjualan');
     }
 
     public function confirm_ajax(string $id)
@@ -245,12 +246,7 @@ class PesananController extends Controller
         if ($request->ajax()) {
             $penjualan = PenjualanModel::with('detail')->find($id);
             if ($penjualan) {
-                foreach ($penjualan->detail ?? [] as $detail) {
-                    $barang = BarangModel::find($detail->barang_id);
-                    $barang->update([
-                        'stok' => $barang->stok + $detail->jumlah
-                    ]);
-                }
+
                 PenjualanDetailModel::where('penjualan_id', $id)->delete();
                 $penjualan->delete();
 

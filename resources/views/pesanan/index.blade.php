@@ -124,53 +124,76 @@
 
         function onValidatePayment(id) {
             const html = `
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header bg-warning">
-                        <h5 class="modal-title">Konfirmasi Validasi Pembayaran</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Apakah Anda yakin customer telah melakukan pembayaran dan pembayaran valid?</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                        <button type="button" onclick="onUpdatePayment('${id}')" data-dismiss="modal" class="btn btn-primary">Ya, Validasi</button>
-                    </div>
-                </div>
-            </div>`;
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">Konfirmasi Validasi Pembayaran</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin customer telah melakukan pembayaran dan pembayaran valid?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="btn-confirm-validate">Ya, Validasi</button>
+            </div>
+        </div>
+    </div>`;
 
             $('#confirmModal').html(html).modal('show');
+
+            // Bind hanya sekali
+            $(document).off('click', '#btn-confirm-validate').on('click', '#btn-confirm-validate', function() {
+                $('#confirmModal').modal('hide');
+
+                // Setelah modal benar-benar tertutup, baru eksekusi update
+                $('#confirmModal').one('hidden.bs.modal', function() {
+                    onUpdatePayment(id);
+                    $('#confirmModal').html('');
+                });
+            });
         }
 
         function onReject(id) {
             const html = `
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header bg-warning">
-                        <h5 class="modal-title">Konfirmasi Validasi Pembatalan</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Apakah Anda yakin akan membatalkan pesanan ini?</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                        <button type="button" onclick="onUpdateReject('${id}')" data-dismiss="modal" class="btn btn-primary">Ya, Batalkan</button>
-                    </div>
-                </div>
-            </div>`;
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">Konfirmasi Validasi Pembatalan</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin akan membatalkan pesanan ini?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="btn-confirm-reject">Ya, Batalkan</button>
+            </div>
+        </div>
+    </div>`;
 
             $('#confirmModal').html(html).modal('show');
+
+            // Bind hanya sekali
+            $(document).off('click', '#btn-confirm-reject').on('click', '#btn-confirm-reject', function() {
+                $('#confirmModal').modal('hide');
+
+                // Setelah modal tertutup, lakukan update
+                $('#confirmModal').one('hidden.bs.modal', function() {
+                    onUpdateReject(id);
+                    $('#confirmModal').html('');
+                });
+            });
         }
 
         function onUpdatePayment(id) {
+            const url = `/pesanan/${id}/update_status`;
             $.ajax({
-                url: `{{ url('/pesanan/${id}/update_status') }}`,
+                url: url,
                 type: 'POST',
                 data: {
                     id: id,
@@ -178,9 +201,6 @@
                 },
                 success: function(response) {
                     if (response.status) {
-                        $('#confirmModal').html('');
-                        $('#confirmModal').modal('hide');
-
                         Swal.fire({
                             icon: 'success',
                             title: 'Berhasil',
@@ -188,21 +208,27 @@
                         });
                         tablePesanan.ajax.reload();
                     } else {
-                        $('#confirmModal').html('');
-                        $('#confirmModal').modal('hide');
                         Swal.fire({
                             icon: 'error',
                             title: 'Terjadi Kesalahan',
                             text: response.message
                         });
                     }
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Gagal menghubungi server.'
+                    });
                 }
-            })
+            });
         }
 
         function onUpdateReject(id) {
+            const url = `/pesanan/${id}/update_status`;
             $.ajax({
-                url: `{{ url('/pesanan/${id}/update_status') }}`,
+                url: url,
                 type: 'POST',
                 data: {
                     id: id,
@@ -210,9 +236,6 @@
                 },
                 success: function(response) {
                     if (response.status) {
-                        $('#confirmModal').html('');
-                        $('#confirmModal').modal('hide');
-
                         Swal.fire({
                             icon: 'success',
                             title: 'Berhasil',
@@ -220,17 +243,24 @@
                         });
                         tablePesanan.ajax.reload();
                     } else {
-                        $('#confirmModal').html('');
-                        $('#confirmModal').modal('hide');
                         Swal.fire({
                             icon: 'error',
                             title: 'Terjadi Kesalahan',
                             text: response.message
                         });
                     }
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Gagal menghubungi server.'
+                    });
                 }
-            })
+            });
         }
+
+
 
 
         var tablePesanan;
