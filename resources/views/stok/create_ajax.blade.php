@@ -28,7 +28,7 @@
                                 <small class="error-text text-danger error-stok_jumlah"></small>
                             </div>
                             <div class="form-group col-lg-2 col-md-3 mb-2">
-                                <label>Harga Total</label>
+                                <label>Harga</label>
                                 <input type="text" name="harga_total[]" class="form-control harga-total" required>
                                 <small class="error-text text-danger error-harga_total"></small>
                             </div>

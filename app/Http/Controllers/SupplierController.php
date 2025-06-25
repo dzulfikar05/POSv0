@@ -198,7 +198,7 @@ class SupplierController extends Controller
                         $kode = trim($value['A']);
 
                         if (SupplierModel::where('supplier_kode', $kode)->exists()) {
-                            $duplikat[] = "Baris $baris - Kode '$kode' sudah ada";
+                            $duplikat[] = " Kode '$kode' sudah ada";
                             continue;
                         }
 
@@ -220,7 +220,8 @@ class SupplierController extends Controller
                     'status' => empty($duplikat),
                     'message' => empty($duplikat)
                         ? 'Data berhasil diimport.'
-                        : 'Import sebagian berhasil:<br>' . implode('<br>', $duplikat)
+                        : nl2br("Import sebagian berhasil.\n" . implode("\n", $duplikat))
+
                 ]);
             }
 

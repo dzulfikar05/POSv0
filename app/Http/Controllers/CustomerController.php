@@ -256,7 +256,7 @@ class CustomerController extends Controller
                         $username = trim($value['B']);
 
                         if (CustomerModel::where('username', $username)->exists()) {
-                            $duplikat[] = "Baris $baris - Username '$username' sudah terdaftar";
+                            $duplikat[] = "Username '$username' sudah terdaftar";
                             continue;
                         }
 
@@ -281,7 +281,8 @@ class CustomerController extends Controller
                     'status' => empty($duplikat),
                     'message' => empty($duplikat)
                         ? 'Data berhasil diimport'
-                        : "Import sebagian berhasil.<br>" . implode('<br>', $duplikat)
+                        : nl2br("Import sebagian berhasil.\n" . implode("\n", $duplikat))
+
                 ]);
             } else {
                 return response()->json([

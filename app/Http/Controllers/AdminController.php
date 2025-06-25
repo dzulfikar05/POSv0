@@ -251,7 +251,7 @@ class AdminController extends Controller
                         // Cek apakah username sudah ada
                         $exists = AdminModel::where('username', $username)->exists();
                         if ($exists) {
-                            $duplikat[] = "Baris $baris - Username '$username' sudah terdaftar";
+                            $duplikat[] = " Username '$username' sudah terdaftar";
                             continue;
                         }
 
@@ -272,7 +272,7 @@ class AdminController extends Controller
                 if (!empty($duplikat)) {
                     return response()->json([
                         'status' => false,
-                        'message' => "Import sebagian berhasil.\n" . implode("\n", $duplikat)
+                        'message' => nl2br("Import sebagian berhasil.\n" . implode("\n", $duplikat))
                     ]);
                 }
 

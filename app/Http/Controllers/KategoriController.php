@@ -185,7 +185,7 @@ class KategoriController extends Controller
                         $kode = trim($value['A']);
 
                         if (KategoriModel::where('kategori_kode', $kode)->exists()) {
-                            $duplikat[] = "Baris $baris - Kode '$kode' sudah ada";
+                            $duplikat[] = " Kode '$kode' sudah ada";
                             continue;
                         }
 
@@ -205,7 +205,8 @@ class KategoriController extends Controller
                     'status' => empty($duplikat),
                     'message' => empty($duplikat)
                         ? 'Data berhasil diimport.'
-                        : 'Import sebagian berhasil:<br>' . implode('<br>', $duplikat)
+                        : nl2br("Import sebagian berhasil.\n" . implode("\n", $duplikat))
+
                 ]);
             }
 

@@ -167,12 +167,12 @@ class UserController extends Controller
                 $file = $request->file('photo');
                 $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                 $file->storeAs('public/uploads/photo', $filename);
-                if(isset($params['photo'])) unset($params['photo']);
+                if (isset($params['photo'])) unset($params['photo']);
                 $params['photo'] = $filename;
             }
 
-            if(isset($params['_token'])) unset($params['_token']);
-            if(isset($params['_method'])) unset($params['_method']);
+            if (isset($params['_token'])) unset($params['_token']);
+            if (isset($params['_method'])) unset($params['_method']);
 
             UserModel::where('user_id', $id)->update($params);
 
@@ -234,6 +234,7 @@ class UserController extends Controller
                     'msgField' => $validator->errors()
                 ]);
             }
+
             $file = $request->file('file_user');
 
             $reader = IOFactory::createReader('Xlsx');
@@ -244,36 +245,55 @@ class UserController extends Controller
             $data = $sheet->toArray(null, false, true, true);
 
             $insert = [];
+            $duplikat = [];
+
             if (count($data) > 1) {
+                $usernames = array_map(fn($v) => $v['B'], array_slice($data, 1)); // Ambil semua username dari baris kedua
+                $existing = UserModel::whereIn('username', $usernames)->pluck('username')->toArray();
+
                 foreach ($data as $baris => $value) {
                     if ($baris > 1) {
+                        $username = $value['B'];
+
+                        if (in_array($username, $existing)) {
+                            $duplikat[] = $username;
+                            continue;
+                        }
+
                         $insert[] = [
                             'nama' => $value['A'],
-                            'username' => $value['B'],
+                            'username' => $username,
                             'level_id' => $value['C'],
-                            'password' => Hash::make($value['B']),
+                            'password' => Hash::make($username),
                             'created_at' => now(),
                         ];
                     }
                 }
 
                 if (count($insert) > 0) {
-                    UserModel::insertOrIgnore($insert);
+                    UserModel::insert($insert);
+                }
+
+                $msg = "Import selesai.";
+                if (count($duplikat) > 0) {
+                    $msg .= "<br>Username sudah ada: " . implode(', ', array_unique($duplikat));
                 }
 
                 return response()->json([
                     'status' => true,
-                    'message' => 'Data berhasil diimport'
-                ]);
-            } else {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Tidak ada data yang diimport'
+                    'message' => $msg
                 ]);
             }
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Tidak ada data yang diimport.'
+            ]);
         }
+
         return redirect('/');
     }
+
 
     public function export_excel()
     {
@@ -329,9 +349,9 @@ class UserController extends Controller
     public function export_pdf()
     {
         $user = UserModel::select('nama', 'username', 'level_id')
-        ->with('level')
-        ->orderBy('user_id')
-        ->get();
+            ->with('level')
+            ->orderBy('user_id')
+            ->get();
 
         $pdf = Pdf::loadView('user.export_pdf', ['user' => $user]);
         $pdf->setPaper('a4', 'portrait');
@@ -340,5 +360,4 @@ class UserController extends Controller
 
         return $pdf->stream('Data User ' . date('Y-m-d H:i:s') . '.pdf');
     }
-
 }

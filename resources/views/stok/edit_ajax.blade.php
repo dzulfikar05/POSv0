@@ -48,7 +48,7 @@
                         <small id="error-stok_jumlah" class="error-text form-text text-danger"></small>
                     </div>
                     <div class="form-group">
-                        <label>Harga Total</label>
+                        <label>Harga</label>
                         <input type="text" name="harga_total" id="harga_total"
                             value="{{ number_format($stok->harga_total, 0, ',', '.') }}" class="form-control" required>
                         <small id="error-harga_total" class="error-text form-text text-danger"></small>
