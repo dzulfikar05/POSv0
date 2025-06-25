@@ -46,11 +46,11 @@
                         {{ $penjualan->customer->wa }}
                     </a>
                     <hr>
-                    <h5>Detail Barang</h5>
+                    <h5>Detail Produk</h5>
                     <table class="table table-bordered" id="tabel-barang">
                         <thead>
                             <tr>
-                                <th>Barang</th>
+                                <th>Produk</th>
                                 <th>Harga</th>
                                 <th>Jumlah</th>
                                 <th>Subtotal</th>
@@ -84,8 +84,10 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" onclick="onComplete({{ $penjualan->penjualan_id }})"
-                        class="btn btn-success btn-sm mr-3"><i class="fa fa-check"></i> Selesaikan Transaksi</button>
+                    @if ($penjualan->status != 'completed')
+                        <button type="button" onclick="onComplete({{ $penjualan->penjualan_id }})"
+                            class="btn btn-success btn-sm mr-3"><i class="fa fa-check"></i> Selesaikan Transaksi</button>
+                    @endif
                     <button type="button" data-dismiss="modal" class="btn btn-warning btn-sm">Tutup</button>
                 </div>
             </div>

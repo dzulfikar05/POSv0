@@ -45,7 +45,8 @@ class PenjualanController extends Controller
                 'customers.wa as customer_wa',
                 DB::raw('(SELECT SUM(harga * jumlah) FROM t_penjualan_detail WHERE t_penjualan_detail.penjualan_id = t_penjualan.penjualan_id) as total_harga'),
             ])
-            ->whereIn('t_penjualan.status', ['paid_off', 'completed']);
+            ->whereIn('t_penjualan.status', ['paid_off', 'completed'])
+            ->orderBy('t_penjualan.penjualan_id', 'desc');
 
         if ($request->tahun) {
             $query->whereYear('t_penjualan.penjualan_tanggal', $request->tahun);
@@ -277,7 +278,7 @@ class PenjualanController extends Controller
             $sheet->setCellValue('F' . $row, $p->user->nama ?? '-');
             $row++;
 
-            // Header detail barang
+            // Header Detail Produk
             $sheet->setCellValue('B' . $row, 'No');
             $sheet->setCellValue('C' . $row, 'Nama Barang');
             $sheet->setCellValue('D' . $row, 'Harga');

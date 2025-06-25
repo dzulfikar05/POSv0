@@ -19,7 +19,7 @@
                     <input type="text" class="form-control" disabled value="{{ date('Y-m-d H:i:s') }}">
                 </div>
                 <hr>
-                <h5>Detail Barang</h5>
+                <h5>Detail Produk</h5>
                 <table class="table table-bordered" id="detail-barang">
                     <thead>
                         <tr>

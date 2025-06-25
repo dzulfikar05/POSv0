@@ -45,8 +45,7 @@ class PesananController extends Controller
                 'customers.wa as customer_wa',
                 DB::raw('(SELECT SUM(harga * jumlah) FROM t_penjualan_detail WHERE t_penjualan_detail.penjualan_id = t_penjualan.penjualan_id) as total_harga'),
             ])
-            ->whereIn('t_penjualan.status', ['validate_payment', 'rejected'])
-            ->orderBy('t_penjualan.penjualan_tanggal', 'desc');
+            ->whereIn('t_penjualan.status', ['validate_payment', 'rejected']);
 
         if ($request->tahun) {
             $penjualan->whereYear('penjualan_tanggal', $request->tahun);
@@ -58,28 +57,26 @@ class PesananController extends Controller
 
         return DataTables::of($penjualan)
             ->addIndexColumn()
-            ->editColumn('penjualan_tanggal', fn($row) => \Carbon\Carbon::parse($row->penjualan_tanggal)->locale('id')->translatedFormat('d F Y - H:i'))
-            ->editColumn('total_harga', fn($row) => number_format($row->total_harga ?? 0, 0, ',', '.'))
+            ->editColumn('penjualan_tanggal', function ($row) {
+                return \Carbon\Carbon::parse($row->penjualan_tanggal)->locale('id')->translatedFormat('d F Y - H:i');
+            })
+            ->editColumn('total_harga', function ($row) {
+                return number_format($row->total_harga ?? 0, 0, ',', '.');
+            })
             ->editColumn('status', function ($row) {
-                if ($row->status === 'validate_payment') {
-                    return '<span class="badge badge-warning">Validasi Pembayaran</span>';
-                } elseif ($row->status === 'rejected') {
-                    return '<span class="badge badge-danger">Dibatalkan</span>';
-                }
-                return $row->status;
+                return match ($row->status) {
+                    'validate_payment' => '<span class="badge badge-warning">Validasi Pembayaran</span>',
+                    'rejected' => '<span class="badge badge-danger">Dibatalkan</span>',
+                    default => $row->status,
+                };
             })
             ->addColumn('customer_wa', function ($row) {
                 return '<a href="https://wa.me/' . $row->customer_wa . '" target="_blank" class="btn btn-success btn-sm">
-                    <i class="fab fa-whatsapp"></i> ' . $row->customer_wa . '
-                </a>';
+                        <i class="fab fa-whatsapp"></i> ' . $row->customer_wa . '
+                    </a>';
             })
             ->addColumn('aksi', function ($row) {
-                $btn = '';
-
-                if ($row->status !== 'rejected') {
-                    $btn .= '<button onclick="modalAction(\'' . url('/pesanan/' . $row->penjualan_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm"><i class="fa fa-eye"></i></button> ';
-                }
-
+                $btn = '<button onclick="modalAction(\'' . url('/pesanan/' . $row->penjualan_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm"><i class="fa fa-eye"></i></button> ';
                 $btn .= '<button onclick="modalAction(\'' . url('/pesanan/' . $row->penjualan_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></button>';
 
                 if ($row->status !== 'rejected') {
@@ -91,6 +88,7 @@ class PesananController extends Controller
             ->rawColumns(['status', 'aksi', 'customer_wa'])
             ->make(true);
     }
+
 
 
     public function create_ajax()
@@ -291,7 +289,7 @@ class PesananController extends Controller
             $sheet->setCellValue('F' . $row, $p->user->nama ?? '-');
             $row++;
 
-            // Header detail barang
+            // Header Detail Produk
             $sheet->setCellValue('B' . $row, 'No');
             $sheet->setCellValue('C' . $row, 'Nama Barang');
             $sheet->setCellValue('D' . $row, 'Harga');

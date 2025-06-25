@@ -230,8 +230,8 @@
                     {
                         data: "harga_total",
                         className: "",
-                        orderable: false,
-                        searchable: false,
+                        orderable: true,
+                        searchable: true,
                         render: function(data) {
                             return '<span style="text-align: right; display: inline-block;">' +
                                 new Intl.NumberFormat('id-ID').format(data) +
@@ -242,8 +242,8 @@
                     {
                         data: "keterangan",
                         className: "",
-                        orderable: false,
-                        searchable: false
+                        orderable: true,
+                        searchable: true
                     },
                     {
                         data: "stok_tanggal",
@@ -256,6 +256,7 @@
                     },
                     {
                         data: "supplier_nama",
+                        name: "m_supplier.supplier_nama",
                         className: "",
                         orderable: true,
                         searchable: true
@@ -263,9 +264,10 @@
 
                     {
                         data: "user_nama",
+                        name: "m_user.nama",
                         className: "",
-                        orderable: false,
-                        searchable: false
+                        orderable: true,
+                        searchable: true
                     },
                     {
                         data: "aksi",

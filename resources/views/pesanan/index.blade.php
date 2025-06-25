@@ -138,9 +138,10 @@
                     },
                     {
                         data: "total_harga",
-                        orderable: false,
-                        searchable: false,
-                        className: "text-right"
+                        name: "total_harga", // diperlukan agar kolom custom bisa diurutkan
+                        className: "text-right",
+                        orderable: true,
+                        searchable: false
                     },
                     {
                         data: "user_nama",
@@ -157,6 +158,7 @@
                     }
                 ]
             });
+
         });
 
         // Open modal

@@ -58,15 +58,13 @@
                         <span class="card-title text-left">{{ $card['title'] }}</span>
                     </div>
                     <div class="card-body">
-                        <span id="{{ $card['id'] }}"
-                            class="font-weight-bold h1 " style="{{ $card['id'] === 'pembelanjaan' ? 'color: grey !important' : '' }}">
+                        <span id="{{ $card['id'] }}" class="dashboard-value text-nowrap"
+                            style="{{ $card['id'] === 'pembelanjaan' ? 'color: grey !important' : '' }}">
                         </span>
                     </div>
                 </div>
             </div>
         @endforeach
-
-
     </div>
 
     <div class="col-12 row px-3 mt-4">
@@ -93,6 +91,33 @@
     </div>
 @endsection
 
+@push('css')
+    <style>
+        .dashboard-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-value {
+                font-size: 1.75rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-value {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .dashboard-value {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+@endpush
+
 @push('js')
     <script>
         let chartPenjualanInstance = null;
@@ -115,19 +140,18 @@
             getChartData();
         });
 
-        formatRupiah = (angka) => {
+        const formatRupiah = (angka) => {
             const absFormatted = new Intl.NumberFormat('id-ID', {
                 style: 'currency',
                 currency: 'IDR',
                 minimumFractionDigits: 0
             }).format(Math.abs(angka));
 
-            return angka < 0 ?
-                `Rp -${absFormatted.replace('Rp', '').trim()}` :
+            return angka < 0 ? `Rp -${absFormatted.replace('Rp', '').trim()}` :
                 `Rp ${absFormatted.replace('Rp', '').trim()}`;
-        }
+        };
 
-        getCardData = () => {
+        const getCardData = () => {
             $.ajax({
                 url: "{{ url('dashboard/getCardData') }}",
                 type: "POST",
@@ -152,12 +176,11 @@
                             element.addClass('text-muted');
                         }
                     });
-
                 }
-            })
-        }
+            });
+        };
 
-        getChartData = () => {
+        const getChartData = () => {
             $.ajax({
                 url: "{{ url('dashboard/getChartData') }}",
                 type: "POST",
@@ -170,9 +193,8 @@
                     const ctxPenjualan = document.getElementById('chartPenjualan').getContext('2d');
                     const ctxItemTerlaris = document.getElementById('chartItemTerlaris').getContext('2d');
 
-                    if (chartPenjualanInstance) {
-                        chartPenjualanInstance.destroy();
-                    }
+                    if (chartPenjualanInstance) chartPenjualanInstance.destroy();
+                    if (chartItemTerlarisInstance) chartItemTerlarisInstance.destroy();
 
                     chartPenjualanInstance = new Chart(ctxPenjualan, {
                         type: 'line',
@@ -195,10 +217,6 @@
                             }
                         }
                     });
-
-                    if (chartItemTerlarisInstance) {
-                        chartItemTerlarisInstance.destroy();
-                    }
 
                     chartItemTerlarisInstance = new Chart(ctxItemTerlaris, {
                         type: 'pie',
@@ -238,13 +256,12 @@
                             responsive: true,
                             plugins: {
                                 legend: {
-                                    position: 'top',
+                                    position: 'top'
                                 },
                                 tooltip: {
                                     callbacks: {
                                         label: function(tooltipItem) {
-                                            return "Terjual : " +
-                                                tooltipItem.raw;
+                                            return "Terjual : " + tooltipItem.raw;
                                         }
                                     }
                                 }

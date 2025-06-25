@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Yajra\DataTables\Facades\DataTables;
 
 class StokController extends Controller
@@ -31,35 +32,41 @@ class StokController extends Controller
         return view('stok.index', compact('breadcrumb', 'page', 'activeMenu'));
     }
 
-    public function list(Request $request)
-    {
-        $stok = StokModel::with(['user', 'supplier'])->select('t_stok.*');
+   public function list(Request $request)
+{
+    $stok = StokModel::select(
+            't_stok.*',
+            'm_user.nama as user_nama',
+            'm_supplier.supplier_nama'
+        )
+        ->leftJoin('m_user', 'm_user.user_id', '=', 't_stok.user_id')
+        ->leftJoin('m_supplier', 'm_supplier.supplier_id', '=', 't_stok.supplier_id');
 
-        if ($request->tahun) {
-            $stok->whereYear('stok_tanggal', $request->tahun);
-        }
-
-        if ($request->bulan) {
-            $stok->whereMonth('stok_tanggal', $request->bulan);
-        }
-
-        return DataTables::of($stok)
-            ->addIndexColumn()
-            ->addColumn('user_nama', function ($stok) {
-                return $stok->user->nama ?? '-';
-            })
-            ->addColumn('supplier_nama', function ($stok) {
-                return $stok->supplier->supplier_nama ?? '-';
-            })
-            ->addColumn('aksi', function ($stok) {
-                return '
-                    <button onclick="modalAction(\'' . url('/stok/' . $stok->stok_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i></button>
-                    <button onclick="modalAction(\'' . url('/stok/' . $stok->stok_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></button>
-                ';
-            })
-            ->rawColumns(['aksi'])
-            ->make(true);
+    if ($request->tahun) {
+        $stok->whereYear('stok_tanggal', $request->tahun);
     }
+
+    if ($request->bulan) {
+        $stok->whereMonth('stok_tanggal', $request->bulan);
+    }
+
+    return DataTables::of($stok)
+        ->addIndexColumn()
+        ->editColumn('user_nama', function ($stok) {
+            return $stok->user_nama ?? '-';
+        })
+        ->editColumn('supplier_nama', function ($stok) {
+            return $stok->supplier_nama ?? '-';
+        })
+        ->addColumn('aksi', function ($stok) {
+            return '
+                <button onclick="modalAction(\'' . url('/stok/' . $stok->stok_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i></button>
+                <button onclick="modalAction(\'' . url('/stok/' . $stok->stok_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></button>
+            ';
+        })
+        ->rawColumns(['aksi'])
+        ->make(true);
+}
 
     public function create_ajax()
     {

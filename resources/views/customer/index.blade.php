@@ -63,7 +63,7 @@
                     <tr>
                         <th>ID</th>
                         <th>Foto</th>
-                        <th>Customername</th>
+                        <th>Username</th>
                         <th>Nama</th>
                         <th>Jenis Kelamin</th>
                         <th>Alamat</th>

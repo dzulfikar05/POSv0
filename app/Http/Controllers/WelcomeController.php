@@ -159,7 +159,7 @@ class WelcomeController extends Controller
         $query = PenjualanModel::with('detail.barang')
             ->where('status', '!=', 'ordered')
             ->where('customer_id', Auth::user()->user_id)
-            ->orderBy('penjualan_tanggal', 'desc')
+            ->orderBy('penjualan_id', 'desc')
             ->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json([
