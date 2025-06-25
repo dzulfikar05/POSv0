@@ -11,7 +11,8 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label>Customer</label>
-                    <select name="customer_id" id="customer_id" class="form-control customer_id" required style="width: 100%">
+                    <select name="customer_id" id="customer_id" class="form-control customer_id" required
+                        style="width: 100%">
                         <option value="">-- Pilih --</option>
                         @foreach ($customers as $row)
                             <option value="{{ $row->user_id }}">{{ $row->nama }} - {{ $row->wa }}</option>
@@ -75,7 +76,8 @@
     function tambahBaris() {
         let barangOptions = '<option value="">-- Pilih --</option>';
         barangs.forEach(barang => {
-            barangOptions += `<option value="${barang.barang_id}" data-harga="${barang.harga}">${barang.barang_nama}</option>`;
+            barangOptions +=
+                `<option value="${barang.barang_id}" data-harga="${barang.harga}">${barang.barang_nama}</option>`;
         });
 
         const row = `
@@ -107,7 +109,7 @@
         });
     }
 
-    $(document).ready(function () {
+    $(document).ready(function() {
         // Inisialisasi awal select2 untuk customer
         $('.customer_id').select2({
             dropdownParent: $('#form-tambah')
@@ -117,7 +119,7 @@
         $('#tambah-barang').on('click', tambahBaris);
 
         // Ketika produk dipilih
-        $('#detail-barang').on('change', '.barang-select', function () {
+        $('#detail-barang').on('change', '.barang-select', function() {
             const harga = $(this).find(':selected').data('harga') || 0;
             const row = $(this).closest('tr');
             row.find('.harga').val(formatRibuan(harga));
@@ -125,7 +127,7 @@
         });
 
         // Perubahan jumlah
-        $('#detail-barang').on('input', '.jumlah', function () {
+        $('#detail-barang').on('input', '.jumlah', function() {
             const row = $(this).closest('tr');
             const jumlah = parseInt(row.find('.jumlah').val()) || 0;
             const harga = parseFloat((row.find('.harga').val() || '0').replace(/\./g, '')) || 0;
@@ -135,16 +137,16 @@
         });
 
         // Hapus baris
-        $('#detail-barang').on('click', '.hapus-baris', function () {
+        $('#detail-barang').on('click', '.hapus-baris', function() {
             $(this).closest('tr').remove();
             hitungTotal();
         });
 
         // Submit AJAX
         $('#form-tambah').validate({
-            submitHandler: function (form) {
+            submitHandler: function(form) {
                 // Hapus format titik ribuan sebelum submit
-                $('#detail-barang .harga, #detail-barang .subtotal').each(function () {
+                $('#detail-barang .harga, #detail-barang .subtotal').each(function() {
                     $(this).val($(this).val().replace(/\./g, ''));
                 });
                 $('#total-harga').val($('#total-harga').val().replace(/\./g, ''));
@@ -153,31 +155,42 @@
                     url: form.action,
                     method: form.method,
                     data: $(form).serialize(),
-                    success: function (response) {
+                    success: function(response) {
                         if (response.status) {
                             $('#myModal').modal('hide');
-                            Swal.fire({ icon: 'success', title: 'Berhasil', text: response.message });
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil',
+                                text: response.message
+                            });
                             tablePesanan.ajax.reload();
+                            setTimeout(() => {
+                                tablePesanan.columns.adjust().draw();
+                            }, 200);
                         } else {
                             $('.error-text').text('');
-                            $.each(response.msgField, function (prefix, val) {
+                            $.each(response.msgField, function(prefix, val) {
                                 $('#error-' + prefix).text(val[0]);
                             });
-                            Swal.fire({ icon: 'error', title: 'Terjadi Kesalahan', text: response.message });
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Terjadi Kesalahan',
+                                text: response.message
+                            });
                         }
                     }
                 });
                 return false;
             },
             errorElement: 'span',
-            errorPlacement: function (error, element) {
+            errorPlacement: function(error, element) {
                 error.addClass('invalid-feedback');
                 element.closest('.form-group').append(error);
             },
-            highlight: function (element) {
+            highlight: function(element) {
                 $(element).addClass('is-invalid');
             },
-            unhighlight: function (element) {
+            unhighlight: function(element) {
                 $(element).removeClass('is-invalid');
             }
         });

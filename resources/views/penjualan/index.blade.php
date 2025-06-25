@@ -23,15 +23,12 @@
                             </a>
                         </div>
                     </div>
-
-
-                    {{-- <button onclick="modalAction('{{ url('/penjualan/create_ajax') }}')" class="btn btn-primary mr-2">
-                        Tambah Data
-                    </button> --}}
+                    {{-- Tombol Tambah Data (aktifkan jika dibutuhkan) --}}
+                    {{-- <button onclick="modalAction('{{ url('/penjualan/create_ajax') }}')" class="btn btn-primary mr-2">Tambah Data</button> --}}
                 </div>
             </div>
-
         </div>
+
         <div class="card-body">
             <div class="row mb-3">
                 <div class="col-md-2">
@@ -61,23 +58,23 @@
                                 11 => 'November',
                                 12 => 'Desember',
                             ];
-                            $currentMonth = date('m');
+                            $currentMonth = date('n');
                         @endphp
                         @foreach ($bulanIndonesia as $num => $nama)
                             <option value="{{ sprintf('%02d', $num) }}" {{ $num == $currentMonth ? 'selected' : '' }}>
-                                {{ $nama }}
-                            </option>
+                                {{ $nama }}</option>
                         @endforeach
                     </select>
                 </div>
-
             </div>
+
             @if (session('success'))
                 <div class="alert alert-success">{{ session('success') }}</div>
             @endif
             @if (session('error'))
                 <div class="alert alert-danger">{{ session('error') }}</div>
             @endif
+
             <table class="table table-bordered table-striped table-hover table-sm" id="table_penjualan">
                 <thead>
                     <tr>
@@ -85,8 +82,8 @@
                         <th>Kode Pesanan</th>
                         <th>Tanggal</th>
                         <th>Pembeli</th>
-                        <th>Nomor Whatsapp Pembeli</th>
-                        <th style="text-align: center">Total Harga</th>
+                        <th>Nomor Whatsapp</th>
+                        <th class="text-center">Total Harga</th>
                         <th>User Pembuat</th>
                         <th>Status</th>
                         <th>Aksi</th>
@@ -95,55 +92,103 @@
             </table>
         </div>
     </div>
-    <div id="myModal" class="modal fade animate shake" tabindex="-1" role="dialog" data-backdrop="static"
-        data-keyboard="false" data-width="75%" aria-hidden="true">
-    </div>
-    <div id="confirmModal" class="modal fade animate shake" tabindex="-1" role="dialog" data-backdrop="static"
-        data-keyboard="false" aria-hidden="true">
-    </div>
-@endsection
 
-@push('css')
-@endpush
+    {{-- Modal --}}
+    <div id="myModal" class="modal fade animate shake" tabindex="-1" role="dialog" data-backdrop="static"
+        data-keyboard="false"></div>
+    <div id="confirmModal" class="modal fade animate shake" tabindex="-1" role="dialog" data-backdrop="static"
+        data-keyboard="false"></div>
+@endsection
 
 @push('js')
     <script>
-        $(() => {
-            $('.filter_tahun').select2({
+        let tablePenjualan;
+
+        $(document).ready(function() {
+            $('.filter_tahun, .filter_bulan').select2({
                 dropdownParent: $('.content-card')
             });
-            $('.filter_bulan').select2({
-                dropdownParent: $('.content-card')
+
+            // Datatable
+            tablePenjualan = $('#table_penjualan').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ url('penjualan/list') }}",
+                    type: "POST",
+                    data: function(d) {
+                        d.tahun = $('#filter_tahun').val();
+                        d.bulan = $('#filter_bulan').val();
+                    }
+                },
+                columns: [{
+                        data: "DT_RowIndex",
+                        className: "text-center",
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: "penjualan_kode"
+                    },
+                    {
+                        data: "penjualan_tanggal"
+                    },
+                    {
+                        data: "customer_nama"
+                    },
+                    {
+                        data: "customer_wa"
+                    },
+                    {
+                        data: "total_harga",
+                        className: "text-right"
+                    },
+                    {
+                        data: "user_nama"
+                    },
+                    {
+                        data: "status",
+                        render: function(data) {
+                            if (data === 'paid_off')
+                                return '<span class="badge badge-primary" style="font-size:12px">Lunas - Disiapkan</span>';
+                            if (data === 'completed')
+                                return '<span class="badge badge-success" style="font-size:12px">Selesai</span>';
+                            return data;
+                        }
+                    },
+                    {
+                        data: "aksi",
+                        orderable: false,
+                        searchable: false
+                    }
+                ]
             });
-        })
 
-        $(() => {
-            updateExportLinks();
-        })
+            $('#filter_tahun, #filter_bulan').on('change', function() {
+                tablePenjualan.ajax.reload();
+                setTimeout(() => {
+                    tablePenjualan.columns.adjust().draw();
+                }, 200);
+                updateExportLinks();
+            });
 
-        $('#filter_tahun, #filter_bulan').on('change', function() {
-            tablePenjualan.ajax.reload();
-            updateExportLinks();
+            updateExportLinks(); // awal
         });
 
         function updateExportLinks() {
             const tahun = $('#filter_tahun').val();
             const bulan = $('#filter_bulan').val();
+            const params = [];
 
-            let baseExcelUrl = "{{ url('/penjualan/export_excel') }}";
-            let basePdfUrl = "{{ url('/penjualan/export_pdf') }}";
+            if (tahun) params.push(`tahun=${tahun}`);
+            if (bulan) params.push(`bulan=${bulan}`);
 
-            let queryParams = [];
-            if (tahun) queryParams.push(`tahun=${tahun}`);
-            if (bulan) queryParams.push(`bulan=${bulan}`);
-
-            let queryString = queryParams.length ? '?' + queryParams.join('&') : '';
-
-            $('#exportExcelUrl').attr('href', baseExcelUrl + queryString);
-            $('#exportPdfUrl').attr('href', basePdfUrl + queryString);
+            const query = params.length ? `?${params.join('&')}` : '';
+            $('#exportExcelUrl').attr('href', `{{ url('/penjualan/export_excel') }}${query}`);
+            $('#exportPdfUrl').attr('href', `{{ url('/penjualan/export_pdf') }}${query}`);
         }
 
-        function modalAction(url = '') {
+        function modalAction(url) {
             $('#myModal').load(url, function() {
                 $('#myModal').modal('show');
             });
@@ -151,31 +196,24 @@
 
         function onComplete(id) {
             const html = `
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-warning">
-                <h5 class="modal-title">Konfirmasi Pesanan Selesai</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>Apakah Anda yakin pesanan telah selesai?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-primary" id="btn-confirm-completed">Ya, Validasi</button>
-            </div>
-        </div>
-    </div>`;
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning">
+                        <h5 class="modal-title">Konfirmasi Pesanan Selesai</h5>
+                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                    </div>
+                    <div class="modal-body"><p>Apakah Anda yakin pesanan telah selesai?</p></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="button" id="btn-confirm-completed" class="btn btn-primary">Ya, Validasi</button>
+                    </div>
+                </div>
+            </div>`;
 
             $('#confirmModal').html(html).modal('show');
 
-            // Bersihkan listener lama dan tambahkan yang baru
             $(document).off('click', '#btn-confirm-completed').on('click', '#btn-confirm-completed', function() {
                 $('#confirmModal').modal('hide');
-
-                // Tunggu modal benar-benar tertutup sebelum kirim AJAX
                 $('#confirmModal').one('hidden.bs.modal', function() {
                     $('#confirmModal').html('');
                     onUpdateCompleted(id);
@@ -192,20 +230,17 @@
                     status: 'completed'
                 },
                 success: function(response) {
-                    if (response.status) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil',
-                            text: response.message
-                        });
-                        tablePenjualan.ajax.reload();
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Terjadi Kesalahan',
-                            text: response.message
-                        });
-                    }
+                    Swal.fire({
+                        icon: response.status ? 'success' : 'error',
+                        title: response.status ? 'Berhasil' : 'Terjadi Kesalahan',
+                        text: response.message
+                    });
+                    if (response.status) tablePenjualan.ajax.reload();
+                    setTimeout(() => {
+                        tablePenjualan.columns.adjust().draw();
+                    }, 200);
+                    $('#myModal').modal('hide');
+
                 },
                 error: function() {
                     Swal.fire({
@@ -216,78 +251,5 @@
                 }
             });
         }
-
-
-        var tablePenjualan;
-        $(document).ready(function() {
-            tablePenjualan = $('#table_penjualan').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    url: "{{ url('penjualan/list') }}",
-                    dataType: "json",
-                    type: "POST",
-                    data: function(d) {
-                        d.tahun = $('#filter_tahun').val();
-                        d.bulan = $('#filter_bulan').val();
-                    }
-                },
-                columns: [{
-                        data: "DT_RowIndex",
-                        className: "text-center",
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: "penjualan_kode",
-                        orderable: true,
-                        searchable: true
-                    },
-                    {
-                        data: "penjualan_tanggal",
-                        orderable: true,
-                        searchable: true
-                    },
-                    {
-                        data: "customer_nama",
-                        orderable: true,
-                        searchable: true
-                    },
-                    {
-                        data: "customer_wa",
-                        orderable: false,
-                        searchable: true
-                    },
-                    {
-                        data: "total_harga",
-                        className: "text-right",
-                        orderable: true,
-                        searchable: false
-                    },
-                    {
-                        data: "user_nama",
-                        orderable: true,
-                        searchable: true
-                    },
-                    {
-                        data: "status",
-                        orderable: true,
-                        searchable: true,
-                        render: function(data) {
-                            if (data == 'paid_off') {
-                                return `<span style="font-size:12px" class="badge badge-primary">Lunas - Disiapkan</span>`;
-                            } else if (data == 'completed') {
-                                return `<span style="font-size:12px" class="badge badge-success">Selesai</span>`;
-                            }
-                        }
-                    },
-                    {
-                        data: "aksi",
-                        orderable: false,
-                        searchable: false
-                    }
-                ]
-            });
-        });
     </script>
 @endpush

@@ -110,8 +110,10 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" onclick="onValidatePayment({{ $penjualan->penjualan_id }})" class="btn btn-success btn-sm"><i class="fa fa-check"></i> Verifikasi Pembayaran</button>
-                    <button type="button" onclick="onReject({{ $penjualan->penjualan_id }})" class="btn btn-danger btn-sm mr-3"><i class="fa fa-times"></i> Batalkan Pesanan</button>
+                    <button type="button" onclick="onValidatePayment({{ $penjualan->penjualan_id }})"
+                        class="btn btn-success btn-sm"><i class="fa fa-check"></i> Verifikasi Pembayaran</button>
+                    <button type="button" onclick="onReject({{ $penjualan->penjualan_id }})"
+                        class="btn btn-danger btn-sm mr-3"><i class="fa fa-times"></i> Batalkan Pesanan</button>
 
                     <button type="button" class="btn btn-warning btn-sm" data-dismiss="modal">Tutup</button>
                     <button type="submit" class="btn btn-primary btn-sm">Simpan Perubahan</button>
@@ -191,6 +193,9 @@
                             text: response.message
                         });
                         tablePesanan.ajax.reload();
+                        setTimeout(() => {
+                            tablePesanan.columns.adjust().draw();
+                        }, 200);
                     } else {
                         $('.error-text').text('');
                         if (response.msgField) {
