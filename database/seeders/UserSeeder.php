@@ -24,13 +24,6 @@ class UserSeeder extends Seeder
             ],
             [
                 'user_id' => 2,
-                'level_id' => 1,
-                'username' => 'admin2',
-                'nama' => 'Manager',
-                'password' => Hash::make('password'),
-            ],
-            [
-                'user_id' => 3,
                 'level_id' => 2,
                 'username' => 'customer',
                 'nama' => 'Customer Random',

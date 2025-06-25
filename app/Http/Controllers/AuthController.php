@@ -26,14 +26,14 @@ class AuthController extends Controller
 
                 $levelId = Auth::user()->level_id;
 
-                if($levelId == 1){
+                if ($levelId == 1) {
                     // admin
                     return response()->json([
                         'status' => true,
                         'message' => 'Login Berhasil',
                         'redirect' => url('/dashboard')
                     ]);
-                }else{
+                } else {
                     // customer
                     return response()->json([
                         'status' => true,
@@ -60,10 +60,10 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        if($levelId == 1){
+        if ($levelId == 1) {
             // admin
             return redirect('login');
-        }else{
+        } else {
             // customer
             return redirect('/');
         }
@@ -77,68 +77,75 @@ class AuthController extends Controller
     public function postRegister(Request $request)
     {
         if ($request->ajax() || $request->wantsJson()) {
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'username' => 'required|string|max:255|unique:m_user',
-                'password' => 'required|string|min:6',
-                'jk' => 'required',
-                'alamat' => 'required|string',
-                'wa' => 'required|integer',
-            ]);
-
-            // Cari ID level CUS
-            $cusLevel = LevelModel::where('level_kode', 'CUS')->first();
-            if (!$cusLevel) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Role CUS tidak ditemukan.',
+            try {
+                $request->validate([
+                    'name' => 'required|string|max:255',
+                    'username' => 'required|string|max:255|unique:m_user',
+                    'password' => 'required|string|min:6',
+                    'jk' => 'required',
+                    'alamat' => 'required|string',
+                    'wa' => 'required|integer',
                 ]);
-            }
 
-            $user = UserModel::create([
-                'level_id' => $cusLevel->level_id,
-                'username' => $request->username,
-                'nama' => $request->name,
-                'jk' => $request->jk,
-                'alamat' => $request->alamat,
-                'wa' => $request->wa,
-                'password' => $request->password,
-            ]);
-
-            if ($user) {
-                $credentials = $request->only('username', 'password');
-
-                if (Auth::attempt($credentials)) {
-
-                    $levelId = Auth::user()->level_id;
-
-                    if($levelId == 1){
-                        return response()->json([
-                            'status' => true,
-                            'message' => 'Registrasi Berhasil',
-                            'redirect' => url('/dashboard')
-                        ]);
-                    }else{
-                        return response()->json([
-                            'status' => true,
-                            'message' => 'Registrasi Berhasil',
-                            'redirect' => url('/')
-                        ]);
-                    }
-                }else{
+                $cusLevel = LevelModel::where('level_kode', 'CUS')->first();
+                if (!$cusLevel) {
                     return response()->json([
-                        'status' => true,
-                        'message' => 'Registrasi Berhasil',
-                        'redirect' => url('login'),
+                        'status' => false,
+                        'message' => 'Role CUS tidak ditemukan.',
                     ]);
                 }
-            } else {
+
+                $user = UserModel::create([
+                    'level_id' => $cusLevel->level_id,
+                    'username' => $request->username,
+                    'nama' => $request->name,
+                    'jk' => $request->jk,
+                    'alamat' => $request->alamat,
+                    'wa' => $request->wa,
+                    'password' => $request->password,
+                ]);
+
+                if ($user) {
+                    $credentials = $request->only('username', 'password');
+
+                    if (Auth::attempt($credentials)) {
+                        return response()->json([
+                            'status' => true,
+                            'message' => 'Registrasi Berhasil',
+                            'redirect' => Auth::user()->level_id == 1 ? url('/dashboard') : url('/')
+                        ]);
+                    } else {
+                        return response()->json([
+                            'status' => true,
+                            'message' => 'Registrasi Berhasil',
+                            'redirect' => url('login'),
+                        ]);
+                    }
+                } else {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Registrasi Gagal',
+                    ]);
+                }
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                $errors = $e->validator->errors();
+
+                if ($errors->has('username')) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Username sudah digunakan. Silakan pilih username lain.',
+                        'msgField' => ['username' => $errors->get('username')]
+                    ]);
+                }
+
                 return response()->json([
                     'status' => false,
-                    'message' => 'Registrasi Gagal',
+                    'message' => 'Validasi gagal.',
+                    'msgField' => $errors
                 ]);
             }
         }
+
         return redirect('register');
     }
 }

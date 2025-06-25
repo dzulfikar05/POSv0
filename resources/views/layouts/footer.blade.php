@@ -1,7 +1,7 @@
 
 <footer class="main-footer">
 
-    <strong>Copyright &copy; 2025 POSzero.</strong> All rights reserved.
+    <strong>Copyright &copy; {{ date('Y') }} {{ $app_name }}.</strong> All rights reserved.
   </footer>
 
   <!-- Control Sidebar -->

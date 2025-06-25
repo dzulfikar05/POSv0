@@ -1,206 +1,218 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Registrasi Pengguna</title>
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('adminlte/plugins/fontawesome-free/css/all.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('adminlte/plugins/icheck-bootstrap/icheck-bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('adminlte/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.min.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .register-wrapper {
+            display: flex;
+            width: 90%;
+            max-width: 900px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #fff;
+        }
+
+        .register-image {
+            flex: 1;
+            background: url('https://images.pexels.com/photos/12935074/pexels-photo-12935074.jpeg?cs=srgb&dl=pexels-imin-technology-276315592-12935074.jpg&fm=jpg') no-repeat center center;
+            background-size: cover;
+        }
+
+        .register-form {
+            flex: 1;
+            padding: 40px 30px;
+        }
+
+        .register-form h1 {
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            height: 45px;
+        }
+
+        .select2-container--default .select2-selection--single {
+            height: 45px;
+            border-radius: 8px;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+        }
+
+        .btn-primary {
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .links {
+            font-size: 14px;
+            margin-top: 20px;
+        }
+
+        .links a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .error-text {
+            font-size: 13px;
+        }
+
+        @media (max-width: 768px) {
+            .register-wrapper {
+                flex-direction: column;
+            }
+
+            .register-image {
+                height: 200px;
+                width: 100%;
+            }
+
+            .register-form {
+                padding: 25px;
+            }
+        }
+    </style>
 </head>
 
-<body class="hold-transition register-page">
-    <div class="register-box">
-        <div class="card card-outline card-primary">
-            <div class="card-header text-center">
-                <a href="{{ url('/') }}" class="h1"><b>Point</b> of Sale</a>
-            </div>
-            <div class="card-body">
-                <p class="login-box-msg">Daftar akun untuk mengakses sistem</p>
+<body>
+    <div class="register-wrapper">
+        <div class="register-image d-none d-md-block"></div>
+        <div class="register-form">
+            <h1>{{ $app_name ?? 'Point of Sale' }}</h1>
+            <p class="text-muted mb-4">Silakan isi form untuk mendaftar</p>
 
-                <form action="{{ url('register') }}" method="POST" id="form-register">
-                    @csrf
-                    <div class="input-group mb-3">
-                        <input type="text" id="name" name="name" class="form-control"
-                            placeholder="Full name">
-                        <div class="input-group-append">
-                            <div class="input-group-text">
-                                <span class="fas fa-user-circle"></span>
-                            </div>
-                        </div>
-                        <small id="error-name" class="error-text text-danger"></small>
-                    </div>
-                    <div class="input-group mb-3">
-                        <input type="text" id="username" name="username" class="form-control"
-                            placeholder="Username">
-                        <div class="input-group-append">
-                            <div class="input-group-text">
-                                <span class="fas fa-user"></span>
-                            </div>
-                        </div>
-                        <small id="error-username" class="error-text text-danger"></small>
-                    </div>
-                    <div class="input-group mb-3">
-                        <input type="password" id="password" name="password" class="form-control"
-                            placeholder="Password">
-                        <div class="input-group-append">
-                            <div class="input-group-text">
-                                <span class="fas fa-lock"></span>
-                            </div>
-                        </div>
-                        <small id="error-password" class="error-text text-danger"></small>
-                    </div>
-                    <div class="form-group">
-                        <select name="jk" id="jk" class="form-control" required placeholder="Jenis Kelamin">
+            <form action="{{ url('register') }}" method="POST" id="form-register">
+                @csrf
+                <div class="mb-3">
+                    <input type="text" name="name" id="name" class="form-control" placeholder="Full name">
+                    <small id="error-name" class="error-text text-danger"></small>
+                </div>
+                <div class="mb-3">
+                    <input type="text" name="username" id="username" class="form-control" placeholder="Username">
+                    <small id="error-username" class="error-text text-danger"></small>
+                </div>
+                <div class="mb-3">
+                    <input type="password" name="password" id="password" class="form-control" placeholder="Password">
+                    <small id="error-password" class="error-text text-danger"></small>
+                </div>
+                <div class="mb-3">
+                    <select name="jk" id="jk" class="form-control">
+                        <option value="">-- Pilih Jenis Kelamin --</option>
+                        <option value="male">Laki-laki</option>
+                        <option value="female">Perempuan</option>
+                    </select>
+                    <small id="error-jk" class="error-text text-danger"></small>
+                </div>
+                <div class="mb-3">
+                    <input type="text" name="wa" id="wa" class="form-control" placeholder="WhatsApp (ex: 628123456789)">
+                    <small id="error-wa" class="error-text text-danger"></small>
+                </div>
+                <div class="mb-3">
+                    <textarea name="alamat" id="alamat" class="form-control" rows="3" placeholder="Alamat"></textarea>
+                    <small id="error-alamat" class="error-text text-danger"></small>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Register</button>
+            </form>
 
-                            <option value="male">Laki-laki
-                            </option>
-                            <option value="female">Perempuan
-                            </option>
-                        </select>
-                        <small id="error-jk" class="error-text form-text text-danger"></small>
-                    </div>
-
-                    <div class="form-group">
-                        <input type="text" name="wa" id="wa" class="form-control"
-                            placeholder="Whatsapp, ex: 628123456789" required>
-                        <small id="error-wa" class="error-text form-text text-danger"></small>
-                    </div>
-                    <div class="form-group">
-                        <textarea name="alamat" id="alamat" class="form-control" cols="30" rows="3" placeholder="Alamat" required></textarea>
-                        <small id="error-alamat" class="error-text form-text text-danger"></small>
-                    </div>
-                    <div class="row">
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-primary btn-block">Register</button>
-                        </div>
-                    </div>
-                </form>
-
-                <a href="{{ url('login') }}" class="text-center">Saya sudah punya akun</a>
+            <div class="links mt-3">
+                <a href="{{ url('login') }}">Sudah punya akun? Masuk di sini</a>
             </div>
         </div>
     </div>
+
+    <!-- JS Dependencies -->
     <script src="{{ asset('adminlte/plugins/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('adminlte/plugins/jquery-validation/jquery.validate.min.js') }}"></script>
-    <script src="{{ asset('adminlte/plugins/jquery-validation/additional-methods.min.js') }}"></script>
     <script src="{{ asset('adminlte/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
-    <script src="{{ asset('adminlte/dist/js/adminlte.min.js') }}"></script>
-    <script>
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-        $(document).ready(function() {
-            $("#form-register").validate({
+    <script>
+        $(document).ready(function () {
+            $('#jk').select2({
+                placeholder: "-- Pilih Jenis Kelamin --",
+                width: '100%',
+                allowClear: true
+            });
+
+            $('#form-register').validate({
                 rules: {
-                    name: {
-                        required: true,
-                        minlength: 3,
-                        maxlength: 50
-                    },
-                    username: {
-                        required: true,
-                        minlength: 4,
-                        maxlength: 20
-                    },
-                    jk: {
-                        required: true,
-                    },
-                    alamat: {
-                        required: true,
-                    },
-                    wa: {
-                        required: true,
-                        pattern: /^(08|62)[1-9][0-9]{7,11}$/
-                    },
-                    password: {
-                        required: true,
-                        minlength: 6,
-                        maxlength: 20
-                    }
+                    name: { required: true, minlength: 3, maxlength: 50 },
+                    username: { required: true, minlength: 4, maxlength: 20 },
+                    password: { required: true, minlength: 6, maxlength: 20 },
+                    jk: { required: true },
+                    wa: { required: true, pattern: /^(62)[1-9][0-9]{7,11}$/ },
+                    alamat: { required: true }
                 },
                 messages: {
-                    name: {
-                        required: "Nama lengkap wajib diisi",
-                        minlength: "Nama minimal 3 karakter",
-                        maxlength: "Nama maksimal 50 karakter"
-                    },
-                    username: {
-                        required: "Username wajib diisi",
-                        minlength: "Username minimal 4 karakter",
-                        maxlength: "Username maksimal 20 karakter"
-                    },
-                    wa: {
-                        required: "Nomor WhatsApp wajib diisi",
-                        pattern: "Masukkan nomor WhatsApp yang valid (diawali 08 dan hanya angka)"
-                    },
-                    password: {
-                        required: "Password wajib diisi",
-                        minlength: "Password minimal 6 karakter",
-                        maxlength: "Password maksimal 20 karakter"
-                    }
+                    name: { required: "Nama lengkap wajib diisi", minlength: "Minimal 3 karakter", maxlength: "Maksimal 50 karakter" },
+                    username: { required: "Username wajib diisi", minlength: "Minimal 4 karakter", maxlength: "Maksimal 20 karakter" },
+                    password: { required: "Password wajib diisi", minlength: "Minimal 6 karakter", maxlength: "Maksimal 20 karakter" },
+                    wa: { required: "Nomor WhatsApp wajib diisi", pattern: "Harus dimulai dengan 62 dan hanya angka" },
+                    alamat: { required: "Alamat wajib diisi" }
                 },
-                submitHandler: function(form) {
+                submitHandler: function (form) {
+                    $('.error-text').text('');
                     $.ajax({
                         url: form.action,
                         type: form.method,
                         data: $(form).serialize(),
                         dataType: 'json',
-                        success: function(response) {
+                        success: function (response) {
                             if (response.status) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Berhasil',
-                                    text: response.message,
-                                }).then(function() {
+                                Swal.fire({ icon: 'success', title: 'Berhasil', text: response.message }).then(() => {
                                     window.location = response.redirect;
                                 });
                             } else {
-                                $('.error-text').text('');
                                 if (response.msgField) {
-                                    $.each(response.msgField, function(prefix, val) {
-                                        $('#error-' + prefix).text(val[0]);
+                                    $.each(response.msgField, function (field, msg) {
+                                        $('#error-' + field).text(msg[0]);
                                     });
                                 }
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Terjadi Kesalahan',
-                                    text: response.message
-                                });
+                                Swal.fire({ icon: 'error', title: 'Gagal', text: response.message });
                             }
                         },
-                        error: function(xhr) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Kesalahan Server',
-                                text: 'Terjadi kesalahan pada server. Silakan coba lagi.'
-                            });
+                        error: function () {
+                            Swal.fire({ icon: 'error', title: 'Kesalahan Server', text: 'Terjadi kesalahan saat proses registrasi.' });
                         }
                     });
                     return false;
                 },
-                errorElement: 'span',
-                errorPlacement: function(error, element) {
-                    error.addClass('invalid-feedback');
-
-                    if (element.parent('.input-group').length) {
-                        element.parent('.input-group').after(error);
-                    } else {
-                        element.after(error);
-                    }
+                errorPlacement: function (error, element) {
+                    const parent = element.closest('.form-group') || element.parent();
+                    parent.find('.error-text').text(error.text());
                 },
-                highlight: function(element) {
+                highlight: function (element) {
                     $(element).addClass('is-invalid');
                 },
-                unhighlight: function(element) {
+                unhighlight: function (element) {
                     $(element).removeClass('is-invalid');
                 }
             });

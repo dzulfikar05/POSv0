@@ -4,7 +4,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'Point Of Sale') }}</title>
+    <title>{{ $app_name }}</title>
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Google Font: Source Sans Pro -->
@@ -36,7 +37,7 @@
         <nav class="main-header navbar navbar-expand-md navbar-dark bg-custom-green fixed-top">
             <div class="container">
                 <a href="{{ url('/') }}" class="navbar-brand d-flex align-items-center">
-                    <span class="brand-text font-weight-bold d-none d-md-inline">{{ $title ?? 'POS System' }}</span>
+                    <span class="brand-text font-weight-bold d-none d-md-inline">{{ $app_name ?? 'POS System' }}</span>
                 </a>
 
 
@@ -59,9 +60,10 @@
                 </div>
 
                 <!-- Right navbar links -->
-                <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto icon-navbar"  style="margin-top:-12px !important">
+                <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto icon-navbar"
+                    style="margin-top:-12px !important">
                     <li class="nav-item">
-                        <a class="nav-link header-icon" href="#" onclick="onShowCart()" id="cart-icon" >
+                        <a class="nav-link header-icon" href="#" onclick="onShowCart()" id="cart-icon">
                             <i class="fas fa-shopping-cart"></i>
                             @if ($cart != null)
                                 <span class="badge cart-count" style="margin-top:10px"></span>
@@ -211,20 +213,23 @@
         <!-- Footer -->
         <footer class="main-footer bg-light">
             <div class="container py-4">
-                {{-- <div class="row">
+                <div class="row">
                     <div class="col-md-6">
-                        <h5>About Us</h5>
-                        <p>We provide modern point of sale solutions for businesses of all sizes.</p>
+                        <h5>Alamat</h5>
+                        <p>{{ $addressSystem }}</p>
                     </div>
 
                     <div class="col-md-6">
-                        <h5>Contact</h5>
+                        <h5>Kontak</h5>
                         <p>
-                            <i class="fas fa-envelope mr-2"></i> info@posystem.com<br>
-                            <i class="fas fa-phone mr-2"></i> +1 (123) 456-7890
+                            <i class="fab fa-whatsapp mr-2 text-success"></i>
+                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $waSystem) }}" target="_blank">
+                                {{ $waSystem }}
+                            </a>
                         </p>
+
                     </div>
-                </div> --}}
+                </div>
                 <div class="text-center mt-3">
                     <p>&copy; {{ date('Y') }} POS Zero. All rights reserved.</p>
                 </div>
@@ -290,6 +295,39 @@
     @include('guest.history')
     @include('guest.script')
 
+
+    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $waSystem) }}" target="_blank" class="wa-float"
+        title="Hubungi via WhatsApp">
+        <i class="fab fa-whatsapp my-float"></i>
+    </a>
+
+    <style>
+        .wa-float {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            bottom: 25px;
+            right: 25px;
+            background-color: #25d366;
+            color: #fff;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 30px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .wa-float:hover {
+            background-color: #1ebea5;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .my-float {
+            margin-top: 14px;
+        }
+    </style>
 </body>
 
 </html>

@@ -10,6 +10,7 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\LevelController;
 use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\PesananController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StokController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
@@ -172,7 +173,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/export_excel', [StokController::class, 'export_excel']);
             Route::get('/export_pdf', [StokController::class, 'export_pdf']);
             Route::get('/rekap_per_bulan', [StokController::class, 'rekap_per_bulan']);
-
         });
 
         Route::group(['prefix' => 'penjualan'], function () {
@@ -209,6 +209,16 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{id}/update_status', [PesananController::class, 'update_status']);
             Route::get('/{id}/print_struk', [PesananController::class, 'print_struk']);
         });
-    });
 
+        Route::group(['prefix' => 'setting'], function () {
+            Route::get('/', [SettingController::class, 'index']);
+            Route::post('/list', [SettingController::class, 'list']);
+            Route::get('/create_ajax', [SettingController::class, 'create_ajax']);
+            Route::post('/ajax', [SettingController::class, 'store_ajax']);
+            Route::get('/{id}/edit_ajax', [SettingController::class, 'edit_ajax']);
+            Route::put('/{id}/update_ajax', [SettingController::class, 'update_ajax']);
+            Route::get('/{id}/delete_ajax', [SettingController::class, 'confirm_ajax']);
+            Route::delete('/{id}/delete_ajax', [SettingController::class, 'delete_ajax']);
+        });
+    });
 });

@@ -1,69 +1,144 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Login Pengguna</title>
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap">
     <link rel="stylesheet" href="{{ asset('adminlte/plugins/fontawesome-free/css/all.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('adminlte/plugins/icheck-bootstrap/icheck-bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('adminlte/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.min.css') }}">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .login-wrapper {
+            display: flex;
+            width: 90%;
+            max-width: 900px;
+            height: 600px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #fff;
+        }
+
+        .login-image {
+            flex: 1;
+            background: url('https://images.pexels.com/photos/12935074/pexels-photo-12935074.jpeg?cs=srgb&dl=pexels-imin-technology-276315592-12935074.jpg&fm=jpg') no-repeat center center;
+            background-size: cover;
+        }
+
+        .login-form {
+            flex: 1;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-form h1 {
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #007bff;
+            font-size: 26px;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            height: 45px;
+        }
+
+        .btn-primary {
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .links {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+
+        .links a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .error-text {
+            font-size: 13px;
+        }
+
+        @media (max-width: 768px) {
+            .login-wrapper {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .login-image {
+                height: 200px;
+                width: 100%;
+            }
+
+            .login-form {
+                padding: 25px;
+            }
+        }
+    </style>
 </head>
 
-<body class="hold-transition login-page">
-    <div class="login-box">
-        <div class="card card-outline card-primary">
-            <div class="card-header text-center"><a href="{{ url('/') }}" class="h1"><b>Point</b> of Sale</a></div>
-            <div class="card-body">
-                <p class="login-box-msg">Login untuk mengakses sistem</p>
-                <form action="{{ url('login') }}" method="POST" id="form-login">
-                    @csrf
-                    <div class="input-group mb-3">
-                        <input type="text" id="username" name="username" class="form-control"
-                            placeholder="Username">
-                        <div class="input-group-append">
-                            <div class="input-group-text">
-                                <span class="fas fa-user"></span>
-                            </div>
-                        </div>
-                        <small id="error-username" class="error-text text-danger"></small>
-                    </div>
-                    <div class="input-group mb-3">
-                        <input type="password" id="password" name="password" class="form-control"
-                            placeholder="Password">
-                        <div class="input-group-append">
-                            <div class="input-group-text">
-                                <span class="fas fa-lock"></span>
-                            </div>
-                        </div>
-                        <small id="error-password" class="error-text text-danger"></small>
-                    </div>
-                    <div class="row">
-                        {{-- <div class="col-8">
-                            <div class="icheck-primary">
-                                <input type="checkbox" id="remember"><label for="remember">Remember Me</label>
-                            </div>
-                        </div> --}}
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-primary btn-block">Masuk</button>
-                        </div>
-                        </div>
-                </form>
-                <p class="mt-3 mb-1">
-                    Belum memiliki akun? <a href="{{ url('register') }}"> Daftar</a>
-                </p>
+<body>
+    <div class="login-wrapper">
+        <div class="login-image d-none d-md-block"></div>
+        <div class="login-form">
+            <h1>{{ $app_name ?? 'Point of Sale' }}</h1>
+            <p class="text-muted mb-4">Silakan masuk untuk melanjutkan</p>
+
+            <form action="{{ url('login') }}" method="POST" id="form-login">
+                @csrf
+                <div class="mb-3">
+                    <input type="text" id="username" name="username" class="form-control" placeholder="Username">
+                    <small id="error-username" class="error-text text-danger"></small>
+                </div>
+                <div class="mb-3">
+                    <input type="password" id="password" name="password" class="form-control" placeholder="Password">
+                    <small id="error-password" class="error-text text-danger"></small>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Masuk</button>
+            </form>
+
+            <div class="links mt-3 d-flex justify-content-between flex-wrap gap-2">
+                <a href="{{ url('register') }}">Belum punya akun?</a>
+                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $waSystem ?? '6281234567890') }}"
+                    target="_blank">
+                    Lupa Password? Hubungi Admin
+                </a>
             </div>
-            </div>
+
         </div>
+    </div>
+
+    <!-- JS Dependencies -->
     <script src="{{ asset('adminlte/plugins/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('adminlte/plugins/jquery-validation/jquery.validate.min.js') }}"></script>
     <script src="{{ asset('adminlte/plugins/jquery-validation/additional-methods.min.js') }}"></script>
     <script src="{{ asset('adminlte/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
-    <script src="{{ asset('adminlte/dist/js/adminlte.min.js') }}"></script>
+
     <script>
         $.ajaxSetup({
             headers: {
@@ -88,31 +163,31 @@
                 messages: {
                     username: {
                         required: "Username wajib diisi",
-                        minlength: "Username minimal 4 karakter",
-                        maxlength: "Username maksimal 20 karakter"
+                        minlength: "Minimal 4 karakter",
+                        maxlength: "Maksimal 20 karakter"
                     },
                     password: {
                         required: "Password wajib diisi",
-                        minlength: "Password minimal 6 karakter",
-                        maxlength: "Password maksimal 20 karakter"
+                        minlength: "Minimal 6 karakter",
+                        maxlength: "Maksimal 20 karakter"
                     }
                 },
-                submitHandler: function(form) { // ketika valid, maka bagian yg akan dijalankan
+                submitHandler: function(form) {
                     $.ajax({
                         url: form.action,
                         type: form.method,
                         data: $(form).serialize(),
                         dataType: 'json',
                         success: function(response) {
-                            if (response.status) { // jika sukses
+                            if (response.status) {
                                 Swal.fire({
                                     icon: 'success',
                                     title: 'Berhasil',
                                     text: response.message,
-                                }).then(function() {
+                                }).then(() => {
                                     window.location = response.redirect;
                                 });
-                            } else { // jika error
+                            } else {
                                 $('.error-text').text('');
                                 if (response.msgField) {
                                     $.each(response.msgField, function(prefix, val) {
@@ -126,7 +201,7 @@
                                 });
                             }
                         },
-                        error: function(xhr) {
+                        error: function() {
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Kesalahan Server',
@@ -136,10 +211,9 @@
                     });
                     return false;
                 },
-                errorElement: 'span',
                 errorPlacement: function(error, element) {
-                    error.addClass('invalid-feedback');
-                    element.closest('.input-group').append(error);
+                    const parent = element.closest('.form-group') || element.parent();
+                    parent.find('.error-text').text(error.text());
                 },
                 highlight: function(element) {
                     $(element).addClass('is-invalid');

@@ -64,6 +64,14 @@
                     <p>Transaksi Penjualan</p>
                 </a>
             </li>
+            <!-- Setting -->
+            <li class="nav-header">Pengaturan</li>
+            <li class="nav-item">
+                <a href="{{ url('/setting') }}" class="nav-link {{ $activeMenu == 'setting' ? 'active' : '' }}">
+                    <i class="nav-icon fas fa-cog"></i>
+                    <p>Pengaturan Sistem</p>
+                </a>
+            </li>
             <li class="nav-header"></li>
             <li class="nav-item">
                 <a href="{{ url('/logout') }}" class="nav-link btn btn-danger text-white">
