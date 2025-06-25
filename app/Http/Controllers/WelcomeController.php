@@ -14,6 +14,13 @@ class WelcomeController extends Controller
 {
     public function index()
     {
+
+        $isAdmin = Auth::user()?->level_id == 1;
+
+        if ($isAdmin) {
+            return redirect('/dashboard');
+        }
+
         $penjualan = null;
         if (Auth::user()) {
             $penjualan = PenjualanModel::with('detail.barang')->select('penjualan_id')->where('customer_id', Auth::user()->user_id)->where('status', 'ordered')->first();
