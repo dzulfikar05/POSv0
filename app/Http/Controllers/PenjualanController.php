@@ -30,65 +30,68 @@ class PenjualanController extends Controller
         return view('penjualan.index', compact('breadcrumb', 'page', 'activeMenu'));
     }
 
-    public function list(Request $request)
-    {
-        $query = DB::table('t_penjualan')
-            ->join('m_user', 'm_user.user_id', '=', 't_penjualan.user_id')
-            ->join('m_user as customers', 'customers.user_id', '=', 't_penjualan.customer_id')
-            ->select([
-                't_penjualan.penjualan_id',
-                't_penjualan.penjualan_kode',
-                't_penjualan.penjualan_tanggal',
-                't_penjualan.status',
-                'm_user.nama as user_nama',
-                'customers.nama as customer_nama',
-                'customers.wa as customer_wa',
-                DB::raw('(SELECT SUM(harga * jumlah) FROM t_penjualan_detail WHERE t_penjualan_detail.penjualan_id = t_penjualan.penjualan_id) as total_harga'),
-            ])
-            ->whereIn('t_penjualan.status', ['paid_off', 'completed'])
-            ->orderBy('t_penjualan.penjualan_id', 'desc');
+  public function list(Request $request)
+{
+    $query = DB::table('t_penjualan')
+        ->join('m_user as u1', 'u1.user_id', '=', 't_penjualan.user_id') // user pembuat
+        ->join('m_user as u2', 'u2.user_id', '=', 't_penjualan.customer_id') // customer
+        ->leftJoin(DB::raw('(SELECT penjualan_id, SUM(harga * jumlah) as total_harga FROM t_penjualan_detail GROUP BY penjualan_id) as tpd'), 'tpd.penjualan_id', '=', 't_penjualan.penjualan_id')
+        ->select([
+            't_penjualan.penjualan_id',
+            't_penjualan.penjualan_kode',
+            't_penjualan.penjualan_tanggal',
+            't_penjualan.status',
+            'u1.nama as user_nama',
+            'u2.nama as customer_nama',
+            'u2.wa as customer_wa',
+            'tpd.total_harga'
+        ])
+        ->whereIn('t_penjualan.status', ['paid_off', 'completed']);
 
-        if ($request->tahun) {
-            $query->whereYear('t_penjualan.penjualan_tanggal', $request->tahun);
-        }
+    if ($request->tahun) {
+        $query->whereYear('t_penjualan.penjualan_tanggal', $request->tahun);
+    }
 
-        if ($request->bulan) {
-            $query->whereMonth('t_penjualan.penjualan_tanggal', $request->bulan);
-        }
+    if ($request->bulan) {
+        $query->whereMonth('t_penjualan.penjualan_tanggal', $request->bulan);
+    }
 
-        return DataTables::of($query)
-            ->addIndexColumn()
-            ->editColumn('penjualan_tanggal', function ($row) {
-                return \Carbon\Carbon::parse($row->penjualan_tanggal)
-                    ->locale('id_ID')
-                    ->translatedFormat('d F Y - H:i');
-            })
-            ->editColumn('total_harga', function ($row) {
-                return number_format($row->total_harga ?? 0, 0, ',', '.');
-            })
-            ->editColumn('status', function ($row) {
-                if ($row->status === 'paid_off') {
-                    return '<span class="badge badge-primary" style="font-size:12px">Lunas - Disiapkan</span>';
-                } elseif ($row->status === 'completed') {
-                    return '<span class="badge badge-success" style="font-size:12px">Selesai</span>';
-                }
-                return $row->status;
-            })
-            ->addColumn('customer_wa', function ($row) {
-                return '<a href="https://wa.me/' . $row->customer_wa . '" target="_blank" class="btn btn-success btn-sm">
-                        <i class="fab fa-whatsapp"></i> ' . $row->customer_wa . '
-                    </a>';
-            })
-            ->addColumn('aksi', function ($row) {
-                return '
+    return DataTables::of($query)
+        ->addIndexColumn()
+        ->editColumn('penjualan_tanggal', function ($row) {
+            return \Carbon\Carbon::parse($row->penjualan_tanggal)
+                ->locale('id')
+                ->translatedFormat('d F Y - H:i');
+        })
+        ->editColumn('total_harga', function ($row) {
+            return number_format($row->total_harga ?? 0, 0, ',', '.');
+        })
+        ->filterColumn('user_nama', function ($query, $keyword) {
+            $query->where('u1.nama', 'like', "%{$keyword}%");
+        })
+        ->filterColumn('customer_nama', function ($query, $keyword) {
+            $query->where('u2.nama', 'like', "%{$keyword}%");
+        })
+        ->editColumn('status', function ($row) {
+            return match ($row->status) {
+                'paid_off' => '<span class="badge badge-primary">Lunas - Disiapkan</span>',
+                'completed' => '<span class="badge badge-success">Selesai</span>',
+                default => $row->status,
+            };
+        })
+        ->addColumn('customer_wa', function ($row) {
+            return '<a href="https://wa.me/' . $row->customer_wa . '" target="_blank" class="btn btn-success btn-sm"><i class="fab fa-whatsapp"></i> ' . $row->customer_wa . '</a>';
+        })
+        ->addColumn('aksi', function ($row) {
+            return '
                 <button onclick="modalAction(\'' . url('/penjualan/' . $row->penjualan_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm"><i class="fa fa-eye"></i></button>
                 <button onclick="modalAction(\'' . url('/penjualan/' . $row->penjualan_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></button>
                 <a target="_blank" href="/penjualan/' . $row->penjualan_id . '/print_struk" class="btn btn-primary btn-sm mx-1"><i class="fa fa-file"></i></a>
             ';
-            })
-            ->rawColumns(['status', 'aksi', 'customer_wa'])
-            ->make(true);
-    }
+        })
+        ->rawColumns(['status', 'aksi', 'customer_wa'])
+        ->make(true);
+}
 
 
     public function create_ajax()

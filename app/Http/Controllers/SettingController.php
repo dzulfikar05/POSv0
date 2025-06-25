@@ -33,24 +33,17 @@ class SettingController extends Controller
 
     public function list(Request $request)
     {
-        $query = SettingModel::query()->orderBy('created_at', 'desc');
+        $query = SettingModel::select(['id', 'label', 'value', 'created_at']);
 
         return DataTables::of($query)
             ->addIndexColumn()
-            ->addColumn('label', function ($row) {
-                return $row->label;
-            })
-            ->addColumn('value', function ($row) {
-                return $row->value;
-            })
-            ->addColumn('created_at', function ($row) {
+            ->editColumn('created_at', function ($row) {
                 return \Carbon\Carbon::parse($row->created_at)
                     ->locale('id')
                     ->translatedFormat('d F Y - H:i');
             })
             ->addColumn('aksi', function ($row) {
-                $btn = '<button onclick="modalAction(\'' . url('/setting/' . $row->id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i></button> ';
-                return $btn;
+                return '<button onclick="modalAction(\'' . url('/setting/' . $row->id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i></button>';
             })
             ->rawColumns(['aksi'])
             ->make(true);

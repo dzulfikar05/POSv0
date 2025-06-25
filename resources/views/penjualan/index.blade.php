@@ -110,7 +110,7 @@
             });
 
             // Datatable
-            tablePenjualan = $('#table_penjualan').DataTable({
+            let tablePenjualan = $('#table_penjualan').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: {
@@ -129,32 +129,33 @@
                     },
                     {
                         data: "penjualan_kode",
-                        name: "penjualan_kode"
+                        name: "t_penjualan.penjualan_kode"
                     },
                     {
                         data: "penjualan_tanggal",
-                        name: "penjualan_tanggal"
+                        name: "t_penjualan.penjualan_tanggal"
                     },
                     {
                         data: "customer_nama",
-                        name: "customer_nama"
+                        name: "u2.nama"
                     },
                     {
                         data: "customer_wa",
-                        name: "customer_wa"
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: "total_harga",
-                        name: "total_harga",
+                        name: "tpd.total_harga",
                         className: "text-right"
                     },
                     {
                         data: "user_nama",
-                        name: "user_nama"
+                        name: "u1.nama"
                     },
                     {
                         data: "status",
-                        name: "status"
+                        name: "t_penjualan.status"
                     },
                     {
                         data: "aksi",
@@ -162,7 +163,6 @@
                         searchable: false
                     }
                 ]
-
             });
 
             $('#filter_tahun, #filter_bulan').on('change', function() {

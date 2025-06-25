@@ -92,7 +92,7 @@
                         <th>ID</th>
                         <th>Item</th>
                         <th>Jumlah</th>
-                        <th>Harga Total</th>
+                        <th>Harga</th>
                         <th>Keterangan</th>
                         <th>Tanggal</th>
                         <th>Supplier</th>
@@ -229,7 +229,7 @@
                     },
                     {
                         data: "harga_total",
-                        className: "",
+                        className: "text-right",
                         orderable: true,
                         searchable: true,
                         render: function(data) {

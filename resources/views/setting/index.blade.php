@@ -64,13 +64,13 @@
                     },
                     {
                         data: "label",
-                        className: "",
+                        name: "label",
                         orderable: true,
                         searchable: true
                     },
                     {
                         data: "value",
-                        className: "",
+                        name: "value",
                         orderable: true,
                         searchable: true
                     },
